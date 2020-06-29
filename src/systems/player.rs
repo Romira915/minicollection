@@ -24,20 +24,14 @@ impl<'s> System<'s> for Player_System {
             if let Some(mv_amount_y) = movement_y {
                 let scaled_amount = 1.4 * mv_amount_y as f32;
                 transform.prepend_translation_y(scaled_amount);
-                // transform.set_scale(Vector3::new(0.0, 0.0, 0.0));
-                transform.set_scale(
-                    *transform.scale()
-                        + Vector3::new(mv_amount_y * 0.5, mv_amount_y * 0.5, mv_amount_y * 0.5),
-                );
+                *transform.scale_mut() +=
+                    Vector3::new(mv_amount_y * -0.5, mv_amount_y * -0.5, mv_amount_y * -0.5);
             }
             if let Some(mv_amount_x) = movement_x {
                 let scaled_amount = 1.4 * mv_amount_x as f32;
                 transform.prepend_translation_x(scaled_amount);
-                // transform.set_scale(Vector3::new(2.0, 2.0, 1.0));
-                transform.set_scale(
-                    *transform.scale()
-                        + Vector3::new(mv_amount_x * -0.5, mv_amount_x * -0.5, mv_amount_x * -0.5),
-                );
+                *transform.scale_mut() +=
+                    Vector3::new(mv_amount_x * -0.5, mv_amount_x * -0.5, mv_amount_x * -0.5);
             }
             if let Some(rotation) = input.action_is_down("rotation") {
                 let rotation = 0.05 * rotation as i32 as f32 * PI;
