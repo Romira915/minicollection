@@ -11,8 +11,7 @@ use amethyst::{
 };
 
 extern crate minicollection as lib;
-use lib::states::ping::PingState;
-use lib::systems::player;
+use lib::{bundle::Bundle, states::ping::PingState};
 
 fn main() -> amethyst::Result<()> {
     amethyst::start_logger(Default::default());
@@ -39,7 +38,7 @@ fn main() -> amethyst::Result<()> {
         )?
         .with_bundle(TransformBundle::new())?
         .with_bundle(InputBundle::<StringBindings>::new().with_bindings_from_file(binding_path)?)?
-        .with(player::Player_System, "player_system", &["input_system"]);
+        .with_bundle(Bundle)?;
 
     let mut game = Application::new(assets_dir, PingState::default(), game_data)?;
     game.run();

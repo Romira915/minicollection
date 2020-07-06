@@ -1,0 +1,39 @@
+//
+//  Sprite sheet data for Amethyst Game Engine: https://www.amethyst.rs
+//  This file was created by TexturePacker: https://www.codeandweb.com/texturepacker
+//
+//  $TexturePacker:SmartUpdate:18ceeab38a9d5f36f76055877dc1f25b:113d11383fb5e6c9ebc5efc9b20dd7f8:775a2b65098e652b7789049a66b41d65$
+//
+
+#![enable(implicit_some)]
+List((
+    texture_width: 1913,
+    texture_height: 838,
+    sprites: [
+        (
+            // 0: beach-cloud-01.png
+            x: 1,
+            y: 525,
+            width: 1073,
+            height: 312,
+            offsets: (0, 0),
+        ),
+        (
+            // 1: beach-cloud-03.png
+            x: 1076,
+            y: 525,
+            width: 836,
+            height: 239,
+            offsets: (0, 0),
+        ),
+        (
+            // 2: beach-mountain-01.png
+            x: 1,
+            y: 1,
+            width: 1448,
+            height: 522,
+            offsets: (0, 0),
+        )
+    ]
+))
+

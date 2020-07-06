@@ -1,13 +1,13 @@
 (
   axes: {
-    "updown": Emulated(
+    "x_axis": Emulated(
+        pos: Key(D),
+        neg: Key(A)
+    ),
+    "y_axis": Emulated(
         pos: Key(W),
         neg: Key(S)
     ),
-    "leftright": Emulated(
-        pos: Key(D),
-        neg: Key(A)
-    )
   },
   actions: {
     "rotation": [ [Key(Space)] ]

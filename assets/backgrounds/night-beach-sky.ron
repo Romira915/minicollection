@@ -1,0 +1,23 @@
+//
+//  Sprite sheet data for Amethyst Game Engine: https://www.amethyst.rs
+//  This file was created by TexturePacker: https://www.codeandweb.com/texturepacker
+//
+//  $TexturePacker:SmartUpdate:d6a6ed6c67763b786a315d8ac3e36a3b:0f391936dd1bf5b0e9c846a8ed6880fb:5e68412402d8b166d170118903cc0a1e$
+//
+
+#![enable(implicit_some)]
+List((
+    texture_width: 1922,
+    texture_height: 1082,
+    sprites: [
+        (
+            // 0: night-beach-sky.png
+            x: 1,
+            y: 1,
+            width: 1920,
+            height: 1080,
+            offsets: (0, 0),
+        )
+    ]
+))
+
