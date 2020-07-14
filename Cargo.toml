@@ -6,6 +6,10 @@ edition = "2018"
 
 [dependencies]
 amethyst = "0.15.0"
+rand = "0.7.3"
+rand_distr = "0.2.2"
+ron = "0.6.0"
+num = "0.3.0"
 
 [features]
 default = ["vulkan"]

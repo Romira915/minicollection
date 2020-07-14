@@ -20,9 +20,32 @@ impl Component for Background {
     type Storage = DenseVecStorage<Self>;
 }
 
-#[derive(Default)]
-pub struct Cloud {}
+pub struct Cloud {
+    pub velocity: f32,
+    pub width: f32,
+    pub height: f32,
+}
 
 impl Component for Cloud {
     type Storage = DenseVecStorage<Self>;
+}
+
+impl Cloud {
+    pub fn new((width, height): (f32, f32)) -> Self {
+        Self {
+            width,
+            height,
+            ..Default::default()
+        }
+    }
+}
+
+impl Default for Cloud {
+    fn default() -> Self {
+        Self {
+            velocity: 10.0,
+            width: Default::default(),
+            height: Default::default(),
+        }
+    }
 }

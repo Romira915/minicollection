@@ -42,11 +42,12 @@ impl Default for PlayerState {
     }
 }
 
+#[derive(Default)]
 pub struct PingPlayer {
     pub player_num: PlayerNumber,
-    pub velocity: Vector2<f32>,
     pub state: PlayerState,
     pub anime_count: usize,
+    pub is_on_stage: bool,
 }
 
 impl PingPlayer {
@@ -62,13 +63,12 @@ impl Component for PingPlayer {
     type Storage = DenseVecStorage<Self>;
 }
 
-impl Default for PingPlayer {
-    fn default() -> Self {
-        Self {
-            velocity: Vector2::new(0.0, 0.0),
-            player_num: Default::default(),
-            state: Default::default(),
-            anime_count: Default::default(),
-        }
-    }
-}
+// impl Default for PingPlayer {
+//     fn default() -> Self {
+//         Self {
+//             player_num: Default::default(),
+//             state: Default::default(),
+//             anime_count: Default::default(),
+//         }
+//     }
+// }

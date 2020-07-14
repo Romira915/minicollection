@@ -1,5 +1,5 @@
 use amethyst::{
-    core::transform::TransformBundle,
+    core::{frame_limiter::FrameRateLimitStrategy, transform::TransformBundle},
     input::{InputBundle, StringBindings},
     prelude::*,
     renderer::{
@@ -40,7 +40,10 @@ fn main() -> amethyst::Result<()> {
         .with_bundle(InputBundle::<StringBindings>::new().with_bindings_from_file(binding_path)?)?
         .with_bundle(Bundle)?;
 
-    let mut game = Application::new(assets_dir, PingState::default(), game_data)?;
+    let mut game = Application::build(assets_dir, PingState::default())?
+        .with_frame_limit(FrameRateLimitStrategy::Yield, lib::FRAME_RATE as u32)
+        .build(game_data)?;
+    // let mut game = Application::new(assets_dir, PingState::default(), game_data)?;
     game.run();
 
     Ok(())

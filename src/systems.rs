@@ -1,4 +1,6 @@
-pub mod player;
+pub mod backgrounds;
 pub mod chara_animation;
 pub mod exclamationmark;
-pub mod backgrounds;
+pub mod player;
+pub mod stages;
+pub mod gravity_collision;

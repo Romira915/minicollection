@@ -28,7 +28,7 @@ impl PingCharaAnimationSystem {
     const RISE: (usize, usize) = (24, 8);
     const DOWN: (usize, usize) = (32, 4);
 
-    const ANIMATION_INTERVAL: usize = 10;
+    const ANIMATION_INTERVAL: usize = (0.07 * (crate::FRAME_RATE as f64)) as usize;
 
     fn anime(&mut self, player: &mut PingPlayer, sprite: &mut SpriteRender) {
         let sp_num_size = match player.state {
