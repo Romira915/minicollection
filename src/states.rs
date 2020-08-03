@@ -1,7 +1,41 @@
-pub mod ping;
+pub mod nowloading;
 pub mod pause;
+pub mod ping;
 
-use amethyst::{prelude::*, window::ScreenDimensions};
+use amethyst::{
+    assets::{AssetStorage, Handle, Loader, ProgressCounter},
+    prelude::*,
+    renderer::{ImageFormat, SpriteRender, SpriteSheet, SpriteSheetFormat, Texture},
+    window::ScreenDimensions,
+};
+
+fn load_sprite_sheet(
+    world: &mut World,
+    filename_noextension: &str,
+    progress_counter: &mut ProgressCounter,
+) -> Handle<SpriteSheet> {
+    let progress_counter_reborrow: &mut ProgressCounter = progress_counter;
+
+    let texture_handle = {
+        let loader = world.read_resource::<Loader>();
+        let texture_storage = world.read_resource::<AssetStorage<Texture>>();
+        loader.load(
+            format!("{}.png", filename_noextension),
+            ImageFormat::default(),
+            progress_counter_reborrow,
+            &texture_storage,
+        )
+    };
+    let loader = world.read_resource::<Loader>();
+    let sprite_sheet_store = world.read_resource::<AssetStorage<SpriteSheet>>();
+    loader.load(
+        format!("{}.ron", filename_noextension),
+        SpriteSheetFormat(texture_handle),
+        progress_counter,
+        &sprite_sheet_store,
+    )
+}
+
 pub fn get_screensize(world: &mut World) -> (f32, f32) {
     let screen_dimensions = world.read_resource::<ScreenDimensions>();
     (screen_dimensions.width(), screen_dimensions.height())

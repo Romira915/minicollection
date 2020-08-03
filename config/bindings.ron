@@ -8,8 +8,22 @@
         pos: Key(W),
         neg: Key(S)
     ),
+    "left_x_axis0": Controller(
+      controller_id: 0,
+      axis: LeftX, 
+      invert: false,
+      dead_zone: 0.2
+    ),
+    "left_y_axis0": Controller(
+      controller_id: 0,
+      axis: LeftY, 
+      invert: false,
+      dead_zone: 0.2
+    )
   },
   actions: {
-    "rotation": [ [Key(Space)] ]
+    "rotation": [ [Key(Space)] ],
+    "enter": [ [Controller(0, A)] ],
+    "pause": [ [Controller(0, Start)] ]
   },
 )

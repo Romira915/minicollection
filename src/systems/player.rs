@@ -2,11 +2,12 @@ use crate::components::{
     player::{PingPlayer, PlayerState},
     GeneralData,
 };
+use amethyst::shrev::{EventChannel, ReaderId};
 use amethyst::{
     core::{math::*, timing::Time, SystemDesc, Transform},
     derive::SystemDesc,
-    ecs::{Join, Read, ReadStorage, System, SystemData, World, WriteStorage},
-    input::{InputHandler, StringBindings},
+    ecs::{Join, Read, ReadStorage, System, SystemData, World, Write, WriteStorage},
+    input::{ControllerEvent, InputHandler, StringBindings},
     renderer::SpriteRender,
 };
 
@@ -19,7 +20,7 @@ impl<'s> System<'s> for PlayerSystem {
     type SystemData = (
         WriteStorage<'s, PingPlayer>,
         WriteStorage<'s, Transform>,
-        Read<'s, InputHandler<StringBindings>>,
+        Write<'s, InputHandler<StringBindings>>,
         WriteStorage<'s, SpriteRender>,
         Read<'s, Time>,
         WriteStorage<'s, GeneralData>,
@@ -27,7 +28,7 @@ impl<'s> System<'s> for PlayerSystem {
 
     fn run(
         &mut self,
-        (mut ping_players, mut transforms, input, mut sprites, time, mut generaldatas): Self::SystemData,
+        (mut ping_players, mut transforms,mut input, mut sprites, time, mut generaldatas): Self::SystemData,
     ) {
         for (p_player, transform, sprite, generaldata) in (
             &mut ping_players,
@@ -37,15 +38,20 @@ impl<'s> System<'s> for PlayerSystem {
         )
             .join()
         {
-            if let Some(mv_amount_x) = input.axis_value("x_axis") {
-                if mv_amount_x != 0.0 {
-                    generaldata.velocity.x =
-                        mv_amount_x * (generaldata.velocity.x.abs() + 50.0).min(300.0);
-                } else {
-                    generaldata.velocity.x = (generaldata.velocity.x * 0.7);
-                    if generaldata.velocity.x.abs() < 1.0 {
-                        generaldata.velocity.x = 0.0;
-                    }
+            let x_axis = input.axis_value("x_axis").unwrap_or(0.0);
+            let left_x_axis0 = input.axis_value("left_x_axis0").unwrap_or(0.0);
+            let mv_amount_x = if x_axis.abs() > left_x_axis0.abs() {
+                x_axis
+            } else {
+                left_x_axis0
+            };
+            if mv_amount_x != 0.0 {
+                generaldata.velocity.x =
+                    mv_amount_x * (generaldata.velocity.x.abs() + 50.0).min(300.0);
+            } else {
+                generaldata.velocity.x = (generaldata.velocity.x * 0.7);
+                if generaldata.velocity.x.abs() < 1.0 {
+                    generaldata.velocity.x = 0.0;
                 }
             }
             // if let Some(mv_amount_y) = input.axis_value("y_axis") {

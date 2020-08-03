@@ -1,7 +1,10 @@
 use amethyst::{
     assets::{AssetStorage, Handle, Loader},
     core::{math::*, transform::Transform},
-    input::{self, VirtualKeyCode},
+    input::{
+        self, is_close_requested, Button, ControllerButton, InputEvent, InputHandler,
+        StringBindings, VirtualKeyCode,
+    },
     prelude::*,
     renderer::{Camera, ImageFormat, SpriteRender, SpriteSheet, SpriteSheetFormat, Texture},
     window::ScreenDimensions,
@@ -19,12 +22,16 @@ impl SimpleState for PauseState {
         _: StateData<'_, GameData<'_, '_>>,
         event: StateEvent,
     ) -> SimpleTrans {
-        if let StateEvent::Window(e) = event {
-            if input::is_key_down(&e, VirtualKeyCode::Escape) {
-                // return Trans::Quit;
-                return Trans::Pop;
-            }
+        match event {
+            StateEvent::Input(e) => match e {
+                InputEvent::ControllerButtonPressed {
+                    which: _,
+                    button: ControllerButton::Start,
+                }
+                | InputEvent::ButtonPressed(Button::Key(VirtualKeyCode::Escape)) => Trans::Pop,
+                _ => Trans::None,
+            },
+            _ => Trans::None,
         }
-        Trans::None
     }
 }
