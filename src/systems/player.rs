@@ -58,10 +58,10 @@ impl<'s> System<'s> for PlayerSystem {
             //     generaldata.velocity.y +=
             //         mv_amount_y * (generaldata.velocity.y.abs() + 30.0).min(250.0);
             // }
-            // if let Some(rotation) = input.action_is_down("rotation") {
-            //     let rotation = 0.05 * rotation as i32 as f32 * PI;
-            //     transform.prepend_rotation_z_axis(rotation);
-            // }
+            if let Some(rotation) = input.action_is_down("rotation") {
+                // let rotation = 0.05 * rotation as i32 as f32 * PI;
+                // transform.prepend_rotation_z_axis(rotation);
+            }
 
             // transform.append_translation_xyz(
             //     generaldata.velocity.x * time.delta_seconds(),

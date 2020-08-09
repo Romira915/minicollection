@@ -1,7 +1,7 @@
 use amethyst::{
     audio::{AudioBundle, DjSystemDesc},
     core::{frame_limiter::FrameRateLimitStrategy, math::*, transform::Transform},
-    ecs::{Component, DenseVecStorage},
+    ecs::{Component, DenseVecStorage, Entity},
     input::{InputBundle, StringBindings},
     prelude::*,
     renderer::{
@@ -13,10 +13,20 @@ use amethyst::{
     utils::application_root_dir,
 };
 
-pub struct Exclamationmark;
+pub struct Exclamationmark{
+    pub self_entity: Entity,
+}
 
 impl Component for Exclamationmark {
     type Storage = DenseVecStorage<Self>;
+}
+
+impl Exclamationmark{
+    pub fn new(self_entity: Entity) -> Self {
+        Exclamationmark {
+            self_entity
+        }
+    }
 }
 
 pub struct ExclamationmarkResources {

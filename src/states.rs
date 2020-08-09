@@ -1,4 +1,4 @@
-pub mod nowloading;
+pub mod loading;
 pub mod pause;
 pub mod ping;
 

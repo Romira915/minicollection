@@ -1,18 +1,18 @@
 use crate::{
     components::{
         backgrounds::*,
-        exclamationmark::ExclamationmarkResources,
+        exclamationmark::{Exclamationmark, ExclamationmarkResources},
         player::{PingPlayer, PlayerNumber},
         stages::*,
         GeneralData, Gravity,
     },
-    states::{nowloading::NowLoadingState, pause::PauseState},
+    states::{loading::LoadingState, pause::PauseState},
     WorldDef,
 };
 use amethyst::{
     assets::{AssetStorage, Handle, Loader, ProgressCounter},
-    core::{math::*, transform::Transform, ArcThreadPool},
-    ecs::{prelude::Entity, Dispatcher, DispatcherBuilder},
+    core::{math::*, transform::Transform, ArcThreadPool, Hidden},
+    ecs::{prelude::Entity, Dispatcher, DispatcherBuilder, WriteStorage},
     input::{
         self, is_close_requested, Button, ControllerButton, InputEvent, InputHandler,
         StringBindings, VirtualKeyCode,
@@ -33,7 +33,7 @@ pub struct PingState<'a, 'b> {
     cpu_sprite_sheet_handle: Option<Handle<SpriteSheet>>,
     dispatcher: Option<Dispatcher<'a, 'b>>,
     progress_counter: Option<ProgressCounter>,
-    entitys: Vec<Entity>,
+    entities: Vec<Entity>,
 }
 
 impl<'a, 'b> SimpleState for PingState<'a, 'b> {
@@ -84,24 +84,26 @@ impl<'a, 'b> SimpleState for PingState<'a, 'b> {
     }
 
     fn on_stop(&mut self, data: StateData<'_, GameData<'_, '_>>) {
-        while let Some(e) = self.entitys.pop() {
-            data.world
-                .delete_entity(e)
-                .expect("Failed to remove PingState");
-        }
+        let world = data.world;
+
+        world
+            .delete_entities(&self.entities)
+            .expect("Failed to remove PingState");
     }
 
     fn update(&mut self, data: &mut StateData<'_, GameData<'_, '_>>) -> SimpleTrans {
+        let world = &mut data.world;
+
         if let Some(progress_counter) = self.progress_counter.as_ref() {
             if !progress_counter.is_complete() {
-                let mut p_c = None;
-                std::mem::swap(&mut self.progress_counter, &mut p_c);
-                return Trans::Push(Box::new(NowLoadingState::new(p_c)));
+                let mut progress_counter = None;
+                std::mem::swap(&mut self.progress_counter, &mut progress_counter);
+                return Trans::Push(Box::new(LoadingState::new(progress_counter)));
             }
         }
 
         if let Some(dispatcher) = self.dispatcher.as_mut() {
-            dispatcher.dispatch(&data.world);
+            dispatcher.dispatch(world);
         }
 
         Trans::None
@@ -164,7 +166,7 @@ impl<'a, 'b> PingState<'a, 'b> {
             ),
             sprite_number: 0,
         };
-        self.entitys.push(
+        self.entities.push(
             world
                 .create_entity()
                 .with(PingPlayer::new(PlayerNumber::P1))
@@ -180,7 +182,7 @@ impl<'a, 'b> PingState<'a, 'b> {
                 )
                 .build(),
         );
-        self.entitys.push(
+        self.entities.push(
             world
                 .create_entity()
                 .with(PingPlayer::new(p2_mode))
@@ -210,7 +212,21 @@ impl<'a, 'b> PingState<'a, 'b> {
             ),
             sprite_number: 0,
         };
-        world.add_resource(ExclamationmarkResources::new(sprite_render, transform));
+
+        let entity = world
+            .create_entity()
+            .with(transform)
+            .with(sprite_render)
+            .with(Hidden)
+            .build();
+
+        world.exec(|mut exclamationmark: WriteStorage<Exclamationmark>| {
+            exclamationmark
+                .insert(entity, Exclamationmark::new(entity))
+                .expect("Failed to Exclamationmark insert");
+        });
+        self.entities.push(entity);
+        // world.add_resource(ExclamationmarkResources::new(sprite_render, transform));
     }
     fn init_backgrounds(&mut self, world: &mut World) {
         use amethyst::renderer::sprite::{
@@ -269,7 +285,7 @@ impl<'a, 'b> PingState<'a, 'b> {
                 Cloud::new(size2.mul(cloud_scale)),
             )
         };
-        self.entitys.push(
+        self.entities.push(
             world
                 .create_entity()
                 .with(Background::default())
@@ -277,7 +293,7 @@ impl<'a, 'b> PingState<'a, 'b> {
                 .with(sprite_render)
                 .build(),
         );
-        self.entitys.push(
+        self.entities.push(
             world
                 .create_entity()
                 .with(cloud)
@@ -285,7 +301,7 @@ impl<'a, 'b> PingState<'a, 'b> {
                 .with(cloud_sprite_render)
                 .build(),
         );
-        self.entitys.push(
+        self.entities.push(
             world
                 .create_entity()
                 .with(cloud2)
@@ -325,7 +341,7 @@ impl<'a, 'b> PingState<'a, 'b> {
                     sprite_sheet: sprite_sheet.clone(),
                     sprite_number,
                 };
-                self.entitys.push(
+                self.entities.push(
                     world
                         .create_entity()
                         .with(Stage)

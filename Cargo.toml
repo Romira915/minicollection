@@ -13,8 +13,9 @@ ron = "0.6.0"
 num = "0.3.0"
 
 [features]
-default = ["vulkan", "sdl_controller"]
+default = ["vulkan", "sdl_controller", "animation"]
 empty = ["amethyst/empty"]
 metal = ["amethyst/metal"]
 vulkan = ["amethyst/vulkan"]
 sdl_controller = ["amethyst/sdl_controller"]
+animation = ["amethyst/animation"]
