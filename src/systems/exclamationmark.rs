@@ -14,21 +14,20 @@ use rand::rngs::ThreadRng;
 pub struct ExclamationmarkSystem {
     spanw_frame: usize,
     count_frame: usize,
+    past_frame: usize,
+    pressed: bool,
 }
 
 impl<'s> System<'s> for ExclamationmarkSystem {
     type SystemData = (
+        Entities<'s>,
         ReadStorage<'s, Exclamationmark>,
-        ReadStorage<'s, SpriteRender>,
-        ReadStorage<'s, Transform>,
         WriteStorage<'s, Hidden>,
+        Read<'s, InputHandler<StringBindings>>,
         Read<'s, Time>,
     );
 
-    fn run(
-        &mut self,
-        (exclamationmarks, spriterenders, transforms, mut hiddens, time): Self::SystemData,
-    ) {
+    fn run(&mut self, (entities, exclamationmarks, mut hiddens, input, time): Self::SystemData) {
         self.count_frame += 1;
         // if self.count_frame == crate::FRAME_RATE * self.spanw_frame {
         //     entities
@@ -42,11 +41,18 @@ impl<'s> System<'s> for ExclamationmarkSystem {
         //         .build();
         // }
 
-        for (exclamationmark,) in (&exclamationmarks,).join() {
-            if self.count_frame == self.spanw_frame {
+        if self.count_frame == self.spanw_frame {
+            for (entity, _) in (&entities, &exclamationmarks).join() {
                 hiddens
-                    .remove(exclamationmark.self_entity.clone())
+                    .remove(entity)
                     .expect("Failed to exclamationmark remove hidden");
+            }
+        }
+        if self.count_frame >= self.spanw_frame && !self.pressed {
+            self.past_frame += 1;
+
+            if let Some(enter) = input.action_is_down("enter") {
+                self.pressed = enter;
             }
         }
     }
@@ -57,6 +63,8 @@ impl Default for ExclamationmarkSystem {
         Self {
             spanw_frame: crate::FRAME_RATE * 5,
             count_frame: Default::default(),
+            past_frame: Default::default(),
+            pressed: false,
         }
     }
 }

@@ -111,7 +111,7 @@ impl<'a, 'b> SimpleState for PingState<'a, 'b> {
 
     fn handle_event(
         &mut self,
-        data: StateData<'_, GameData<'_, '_>>,
+        _data: StateData<'_, GameData<'_, '_>>,
         event: StateEvent,
     ) -> SimpleTrans {
         match event {
@@ -222,7 +222,7 @@ impl<'a, 'b> PingState<'a, 'b> {
 
         world.exec(|mut exclamationmark: WriteStorage<Exclamationmark>| {
             exclamationmark
-                .insert(entity, Exclamationmark::new(entity))
+                .insert(entity, Exclamationmark)
                 .expect("Failed to Exclamationmark insert");
         });
         self.entities.push(entity);

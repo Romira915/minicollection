@@ -13,20 +13,10 @@ use amethyst::{
     utils::application_root_dir,
 };
 
-pub struct Exclamationmark{
-    pub self_entity: Entity,
-}
+pub struct Exclamationmark;
 
 impl Component for Exclamationmark {
     type Storage = DenseVecStorage<Self>;
-}
-
-impl Exclamationmark{
-    pub fn new(self_entity: Entity) -> Self {
-        Exclamationmark {
-            self_entity
-        }
-    }
 }
 
 pub struct ExclamationmarkResources {

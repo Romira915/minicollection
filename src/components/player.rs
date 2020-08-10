@@ -12,6 +12,7 @@ use amethyst::{
     ui::{RenderUi, UiBundle},
     utils::application_root_dir,
 };
+use serde::{Deserialize, Serialize};
 
 #[derive(PartialEq, Eq)]
 pub enum PlayerNumber {
@@ -26,7 +27,7 @@ impl Default for PlayerNumber {
     }
 }
 
-#[derive(PartialEq, Eq)]
+#[derive(Eq, PartialOrd, PartialEq, Hash, Debug, Copy, Clone, Deserialize, Serialize)]
 pub enum PlayerState {
     wait,
     combat_mode,

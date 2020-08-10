@@ -1,6 +1,6 @@
 use amethyst::{
     assets::{AssetStorage, Handle, Loader, ProgressCounter},
-    core::{math::*, transform::Transform, ArcThreadPool},
+    core::{math::*, timing::Time, transform::Transform, ArcThreadPool},
     ecs::{prelude::Entity, Dispatcher, DispatcherBuilder},
     input::{
         self, is_close_requested, Button, ControllerButton, InputEvent, InputHandler,
@@ -12,7 +12,7 @@ use amethyst::{
     window::ScreenDimensions,
 };
 
-const LOADING_OUTSIDE: f32 = 609.0;
+const LOADING_OUTSIDE_WIDTH: f32 = 609.0;
 
 pub struct LoadingState {
     progress_counter: Option<ProgressCounter>,
@@ -46,11 +46,13 @@ impl SimpleState for LoadingState {
                 let num_assets = ref_progress_counter.num_assets() as f32;
                 let percent = num_finished / num_assets;
 
-                if loading_inside.width <= percent * LOADING_OUTSIDE {
-                    loading_inside.width += 5.;
+                let time = world.read_resource::<Time>();
+                if loading_inside.width <= percent * LOADING_OUTSIDE_WIDTH {
+                    loading_inside.width += 500. * time.delta_seconds();
+                    loading_inside.width = loading_inside.width.min(LOADING_OUTSIDE_WIDTH);
                 }
 
-                // loading_inside.width = percent * LOADING_OUTSIDE;
+                // loading_inside.width = percent * LOADING_OUTSIDE_WIDTH;
                 loading_inside.local_x = loading_inside.width * 0.5;
             }
         }
