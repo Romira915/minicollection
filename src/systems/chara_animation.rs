@@ -1,8 +1,11 @@
-use crate::components::player::{PingPlayer, PlayerState};
+use crate::components::player::*;
 use amethyst::{
+    animation::{
+        self, AnimationCommand, AnimationControlSet, AnimationSet, EndControl, StepDirection,
+    },
     core::{math::*, SystemDesc, Transform},
     derive::SystemDesc,
-    ecs::{Join, Read, ReadStorage, System, SystemData, World, WriteStorage},
+    ecs::{prelude::Entities, Join, Read, ReadStorage, System, SystemData, World, WriteStorage},
     input::{InputHandler, StringBindings},
     renderer::SpriteRender,
 };
@@ -11,11 +14,32 @@ use amethyst::{
 pub struct PingCharaAnimationSystem;
 
 impl<'s> System<'s> for PingCharaAnimationSystem {
-    type SystemData = (WriteStorage<'s, PingPlayer>, WriteStorage<'s, SpriteRender>);
+    type SystemData = (
+        Entities<'s>,
+        WriteStorage<'s, PingPlayer>,
+        WriteStorage<'s, SpriteRender>,
+        ReadStorage<'s, AnimationSet<PlayerState, SpriteRender>>,
+        WriteStorage<'s, AnimationControlSet<PlayerState, SpriteRender>>,
+        Read<'s, InputHandler<StringBindings>>,
+    );
 
-    fn run(&mut self, (mut ping_players, mut sprites): Self::SystemData) {
+    fn run(
+        &mut self,
+        (entities, mut ping_players, mut sprites, animation_sets, mut control_sets, input): Self::SystemData,
+    ) {
         for (player, sprite) in (&mut ping_players, &mut sprites).join() {
-            self.anime(player, sprite);
+            // self.anime(player, sprite);
+        }
+
+        for (entity, animation_set) in (&entities, &animation_sets).join() {
+            let control_set = animation::get_animation_set(&mut control_sets, entity).unwrap();
+
+            if input.action_is_down("enter").unwrap() {
+                control_set.toggle(PlayerState::Run);
+            }
+            if input.action_is_down("back").unwrap() {
+                control_set.start(PlayerState::Attack);
+            }
         }
     }
 }
@@ -32,12 +56,12 @@ impl PingCharaAnimationSystem {
 
     fn anime(&mut self, player: &mut PingPlayer, sprite: &mut SpriteRender) {
         let sp_num_size = match player.state {
-            PlayerState::wait => Self::WAIT,
-            PlayerState::combat_mode => Self::COMBAT_MODE,
-            PlayerState::run => Self::RUN,
-            PlayerState::attack => Self::ATTACK,
-            PlayerState::rise => Self::RISE,
-            PlayerState::down => Self::DOWN,
+            PlayerState::Wait => Self::WAIT,
+            PlayerState::CombatMode => Self::COMBAT_MODE,
+            PlayerState::Run => Self::RUN,
+            PlayerState::Attack => Self::ATTACK,
+            PlayerState::Rise => Self::RISE,
+            PlayerState::Down => Self::DOWN,
         };
 
         sprite.sprite_number =

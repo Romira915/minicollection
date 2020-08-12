@@ -1,7 +1,13 @@
+use crate::components::player::PlayerState;
 use amethyst::{
+    animation::{
+        self, AnimationCommand, AnimationControlSet, AnimationSet, EndControl, StepDirection,
+    },
     assets::{AssetStorage, Handle, Loader, ProgressCounter},
     core::{math::*, timing::Time, transform::Transform, ArcThreadPool},
-    ecs::{prelude::Entity, Dispatcher, DispatcherBuilder},
+    ecs::{
+        prelude::Entity, Dispatcher, DispatcherBuilder, Entities, Join, ReadStorage, WriteStorage,
+    },
     input::{
         self, is_close_requested, Button, ControllerButton, InputEvent, InputHandler,
         StringBindings, VirtualKeyCode,
@@ -35,6 +41,61 @@ impl SimpleState for LoadingState {
         let ref_progress_counter = self.progress_counter.as_ref().unwrap();
 
         if ref_progress_counter.is_complete() {
+            world.exec(
+                |(entities, animation_sets, mut control_sets): (
+                    Entities,
+                    ReadStorage<AnimationSet<PlayerState, SpriteRender>>,
+                    WriteStorage<AnimationControlSet<PlayerState, SpriteRender>>,
+                )| {
+                    for (entity, animation_set) in (&entities, &animation_sets).join() {
+                        let control_set =
+                            animation::get_animation_set(&mut control_sets, entity).unwrap();
+                        control_set.add_animation(
+                            PlayerState::Run,
+                            &animation_set.get(&PlayerState::Run).unwrap(),
+                            EndControl::Loop(Some(1)),
+                            1.0,
+                            AnimationCommand::Init,
+                        );
+                        control_set.add_animation(
+                            PlayerState::Attack,
+                            &animation_set.get(&PlayerState::Attack).unwrap(),
+                            EndControl::Loop(Some(1)),
+                            1.0,
+                            AnimationCommand::Init,
+                        );
+                        control_set.add_animation(
+                            PlayerState::CombatMode,
+                            &animation_set.get(&PlayerState::CombatMode).unwrap(),
+                            EndControl::Loop(Some(1)),
+                            1.0,
+                            AnimationCommand::Init,
+                        );
+                        control_set.add_animation(
+                            PlayerState::Down,
+                            &animation_set.get(&PlayerState::Down).unwrap(),
+                            EndControl::Loop(Some(1)),
+                            1.0,
+                            AnimationCommand::Init,
+                        );
+                        control_set.add_animation(
+                            PlayerState::Rise,
+                            &animation_set.get(&PlayerState::Rise).unwrap(),
+                            EndControl::Loop(Some(1)),
+                            1.0,
+                            AnimationCommand::Init,
+                        );
+                        control_set.add_animation(
+                            PlayerState::Wait,
+                            &animation_set.get(&PlayerState::Wait).unwrap(),
+                            EndControl::Loop(None),
+                            1.0,
+                            AnimationCommand::Start,
+                        );
+                    }
+                },
+            );
+
             return Trans::Pop;
         } else {
             let mut ui_transform = world.write_storage::<UiTransform>();

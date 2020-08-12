@@ -2,7 +2,7 @@ use crate::{
     components::{
         backgrounds::*,
         exclamationmark::{Exclamationmark, ExclamationmarkResources},
-        player::{PingPlayer, PlayerNumber},
+        player::*,
         stages::*,
         GeneralData, Gravity,
     },
@@ -10,9 +10,18 @@ use crate::{
     WorldDef,
 };
 use amethyst::{
-    assets::{AssetStorage, Handle, Loader, ProgressCounter},
+    animation::{
+        self, AnimationCommand, AnimationControlSet, AnimationSet, EndControl, StepDirection,
+    },
+    assets::{
+        AssetStorage, Handle, Loader, PrefabData, PrefabLoader, PrefabLoaderSystemDesc,
+        ProgressCounter, RonFormat,
+    },
     core::{math::*, transform::Transform, ArcThreadPool, Hidden},
-    ecs::{prelude::Entity, Dispatcher, DispatcherBuilder, WriteStorage},
+    ecs::{
+        prelude::Entity, Component, Dispatcher, DispatcherBuilder, Entities, Join, ReadStorage,
+        WriteStorage,
+    },
     input::{
         self, is_close_requested, Button, ControllerButton, InputEvent, InputHandler,
         StringBindings, VirtualKeyCode,
@@ -137,6 +146,7 @@ impl<'a, 'b> SimpleState for PingState<'a, 'b> {
     }
 }
 
+use std::marker::{Send, Sync};
 impl<'a, 'b> PingState<'a, 'b> {
     fn init_chara(&mut self, world: &mut World, p2_mode: PlayerNumber) {
         let (screen_width, screen_height) = super::get_screensize(world);
@@ -166,9 +176,18 @@ impl<'a, 'b> PingState<'a, 'b> {
             ),
             sprite_number: 0,
         };
+        let prefab = world.exec(|loader: PrefabLoader<'_, PlayerPrefabData>| {
+            loader.load(
+                "prefab/player_animation.ron",
+                RonFormat,
+                self.progress_counter.as_mut().unwrap(),
+            )
+        });
+
         self.entities.push(
             world
                 .create_entity()
+                .with(prefab.clone())
                 .with(PingPlayer::new(PlayerNumber::P1))
                 .with(p1_sprite_render)
                 .with(p1_transform)
@@ -185,6 +204,7 @@ impl<'a, 'b> PingState<'a, 'b> {
         self.entities.push(
             world
                 .create_entity()
+                .with(prefab)
                 .with(PingPlayer::new(p2_mode))
                 .with(p2_sprite_render)
                 .with(p2_transform)
@@ -198,6 +218,8 @@ impl<'a, 'b> PingState<'a, 'b> {
                 )
                 .build(),
         );
+
+        
     }
     fn init_exclamationmark(&mut self, world: &mut World) {
         let (screen_width, screen_height) = super::get_screensize(world);

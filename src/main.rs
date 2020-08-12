@@ -1,9 +1,12 @@
 use amethyst::{
+    animation::AnimationBundle,
+    assets::PrefabLoaderSystemDesc,
     core::{frame_limiter::FrameRateLimitStrategy, transform::TransformBundle},
     input::{InputBundle, StringBindings},
     prelude::*,
     renderer::{
         plugins::{RenderFlat2D, RenderToWindow},
+        sprite::SpriteRender,
         types::DefaultBackend,
         RenderingBundle,
     },
@@ -12,7 +15,7 @@ use amethyst::{
 };
 
 extern crate minicollection as lib;
-use lib::{bundle::Bundle, states::ping::PingState};
+use lib::{bundle::Bundle, components::player::*, states::ping::PingState};
 
 fn main() -> amethyst::Result<()> {
     amethyst::start_logger(Default::default());
@@ -41,6 +44,15 @@ fn main() -> amethyst::Result<()> {
         .with_bundle(TransformBundle::new())?
         .with_bundle(InputBundle::<StringBindings>::new().with_bindings_from_file(binding_path)?)?
         .with_bundle(UiBundle::<StringBindings>::new())?
+        .with_system_desc(
+            PrefabLoaderSystemDesc::<PlayerPrefabData>::default(),
+            "player_loader",
+            &[],
+        )
+        .with_bundle(AnimationBundle::<PlayerState, SpriteRender>::new(
+            "sprite_sampler_interpolation",
+            "sprite_animation_control",
+        ))?
         .with_bundle(Bundle)?;
 
     let mut game = Application::build(assets_dir, PingState::default())?

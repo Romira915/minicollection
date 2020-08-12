@@ -76,9 +76,9 @@ impl<'s> System<'s> for PlayerSystem {
             }
 
             if generaldata.velocity.x == 0.0 {
-                p_player.state = PlayerState::wait;
+                p_player.state = PlayerState::Wait;
             } else {
-                p_player.state = PlayerState::run;
+                p_player.state = PlayerState::Run;
             }
         }
     }

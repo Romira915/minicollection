@@ -24,6 +24,7 @@
   actions: {
     "rotation": [ [Key(Space)] ],
     "enter": [ [Controller(0, A)] ],
+    "back": [ [Controller(0, B)] ],
     "pause": [ [Controller(0, Start)] ]
   },
 )

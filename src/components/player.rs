@@ -1,11 +1,19 @@
 use amethyst::{
+    animation::{
+        get_animation_set, AnimationBundle, AnimationCommand, AnimationControlSet, AnimationSet,
+        AnimationSetPrefab, EndControl,
+    },
+    assets::{PrefabData, ProgressCounter},
     audio::{AudioBundle, DjSystemDesc},
     core::{frame_limiter::FrameRateLimitStrategy, math::*, transform::TransformBundle},
-    ecs::{Component, DenseVecStorage},
+    derive::PrefabData,
+    ecs::{prelude::Entity, Component, DenseVecStorage},
+    error::Error,
     input::{InputBundle, StringBindings},
     prelude::*,
     renderer::{
         plugins::{RenderFlat2D, RenderToWindow},
+        sprite::{prefab::SpriteScenePrefab, SpriteRender},
         types::DefaultBackend,
         RenderingBundle,
     },
@@ -13,6 +21,11 @@ use amethyst::{
     utils::application_root_dir,
 };
 use serde::{Deserialize, Serialize};
+
+#[derive(Debug, Clone, Deserialize, PrefabData)]
+pub struct PlayerPrefabData {
+    animation_set: AnimationSetPrefab<PlayerState, SpriteRender>,
+}
 
 #[derive(PartialEq, Eq)]
 pub enum PlayerNumber {
@@ -29,17 +42,17 @@ impl Default for PlayerNumber {
 
 #[derive(Eq, PartialOrd, PartialEq, Hash, Debug, Copy, Clone, Deserialize, Serialize)]
 pub enum PlayerState {
-    wait,
-    combat_mode,
-    run,
-    attack,
-    rise,
-    down,
+    Wait,
+    CombatMode,
+    Run,
+    Attack,
+    Rise,
+    Down,
 }
 
 impl Default for PlayerState {
     fn default() -> Self {
-        Self::wait
+        Self::Wait
     }
 }
 
