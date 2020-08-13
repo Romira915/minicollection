@@ -21,6 +21,7 @@ use amethyst::{
     utils::application_root_dir,
 };
 use serde::{Deserialize, Serialize};
+use std::collections::VecDeque;
 
 #[derive(Debug, Clone, Deserialize, PrefabData)]
 pub struct PlayerPrefabData {
@@ -43,11 +44,12 @@ impl Default for PlayerNumber {
 #[derive(Eq, PartialOrd, PartialEq, Hash, Debug, Copy, Clone, Deserialize, Serialize)]
 pub enum PlayerState {
     Wait,
-    CombatMode,
+    BattleMode,
     Run,
     Attack,
     Rise,
-    Down,
+    Falling,
+    Falled,
 }
 
 impl Default for PlayerState {
@@ -59,9 +61,10 @@ impl Default for PlayerState {
 #[derive(Default)]
 pub struct PingPlayer {
     pub player_num: PlayerNumber,
-    pub state: PlayerState,
+    pub previous_state: PlayerState,
     pub anime_count: usize,
     pub is_on_stage: bool,
+    pub state_queue: VecDeque<PlayerState>,
 }
 
 impl PingPlayer {
@@ -69,6 +72,15 @@ impl PingPlayer {
         Self {
             player_num: p_num,
             ..Default::default()
+        }
+    }
+
+    pub fn push_state(&mut self, state: PlayerState) {
+        match self.state_queue.back() {
+            Some(s) if *s == state => {}
+            _ => {
+                self.state_queue.push_back(state);
+            }
         }
     }
 }

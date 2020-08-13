@@ -35,7 +35,7 @@ Prefab(
                             ),
                         ),
                         (
-                             CombatMode,
+                             BattleMode,
                             (
                                 samplers: [
                                     (
@@ -91,7 +91,7 @@ Prefab(
                                         SpriteIndex,
                                         (
                                             input: [0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7],
-                                            output: [24, 25, 26, 27, 28, 29, 30, 31, 32],
+                                            output: [24, 25, 26, 27, 28, 29, 30, 31],
                                             function: Step,
                                         ),
                                     ),
@@ -99,15 +99,31 @@ Prefab(
                             ),
                         ),
                         (
-                             Down,
+                             Falling,
                             (
                                 samplers: [
                                     (
                                         0,
                                         SpriteIndex,
                                         (
-                                            input: [0.0, 0.1, 0.2, 0.3],
-                                            output: [33, 34, 35, 36],
+                                            input: [0.0, 0.1, 0.2, 0.3, 0.4],
+                                            output: [32, 33, 32, 33, 34],
+                                            function: Step,
+                                        ),
+                                    ),
+                                ],
+                            ),
+                        ),
+                        (
+                             Falled,
+                            (
+                                samplers: [
+                                    (
+                                        0,
+                                        SpriteIndex,
+                                        (
+                                            input: [0.0, 0.1],
+                                            output: [35, 35],
                                             function: Step,
                                         ),
                                     ),

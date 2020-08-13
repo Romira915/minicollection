@@ -50,41 +50,7 @@ impl SimpleState for LoadingState {
                     for (entity, animation_set) in (&entities, &animation_sets).join() {
                         let control_set =
                             animation::get_animation_set(&mut control_sets, entity).unwrap();
-                        control_set.add_animation(
-                            PlayerState::Run,
-                            &animation_set.get(&PlayerState::Run).unwrap(),
-                            EndControl::Loop(Some(1)),
-                            1.0,
-                            AnimationCommand::Init,
-                        );
-                        control_set.add_animation(
-                            PlayerState::Attack,
-                            &animation_set.get(&PlayerState::Attack).unwrap(),
-                            EndControl::Loop(Some(1)),
-                            1.0,
-                            AnimationCommand::Init,
-                        );
-                        control_set.add_animation(
-                            PlayerState::CombatMode,
-                            &animation_set.get(&PlayerState::CombatMode).unwrap(),
-                            EndControl::Loop(Some(1)),
-                            1.0,
-                            AnimationCommand::Init,
-                        );
-                        control_set.add_animation(
-                            PlayerState::Down,
-                            &animation_set.get(&PlayerState::Down).unwrap(),
-                            EndControl::Loop(Some(1)),
-                            1.0,
-                            AnimationCommand::Init,
-                        );
-                        control_set.add_animation(
-                            PlayerState::Rise,
-                            &animation_set.get(&PlayerState::Rise).unwrap(),
-                            EndControl::Loop(Some(1)),
-                            1.0,
-                            AnimationCommand::Init,
-                        );
+                            
                         control_set.add_animation(
                             PlayerState::Wait,
                             &animation_set.get(&PlayerState::Wait).unwrap(),
