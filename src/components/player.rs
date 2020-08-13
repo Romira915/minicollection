@@ -23,6 +23,8 @@ use amethyst::{
 use serde::{Deserialize, Serialize};
 use std::collections::VecDeque;
 
+const QUEUE_CAPACITY: usize = 2;
+
 #[derive(Debug, Clone, Deserialize, PrefabData)]
 pub struct PlayerPrefabData {
     animation_set: AnimationSetPrefab<PlayerState, SpriteRender>,
@@ -71,13 +73,14 @@ impl PingPlayer {
     pub fn new(p_num: PlayerNumber) -> Self {
         Self {
             player_num: p_num,
+            state_queue: VecDeque::with_capacity(QUEUE_CAPACITY),
             ..Default::default()
         }
     }
 
     pub fn push_state(&mut self, state: PlayerState) {
         match self.state_queue.back() {
-            Some(s) if *s == state => {}
+            Some(s) if *s == state || self.state_queue.len() == QUEUE_CAPACITY => {}
             _ => {
                 self.state_queue.push_back(state);
             }

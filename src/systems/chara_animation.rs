@@ -54,41 +54,41 @@ impl<'s> System<'s> for PingCharaAnimationSystem {
                                     EndControl::Loop(None),
                                 );
                             }
-                            if !control_set.has_animation(one_loop_state) {
-                                add_animation(
-                                    control_set,
-                                    &animation_set,
-                                    one_loop_state,
-                                    EndControl::Stay,
-                                );
-                            }
                             EndControl::Stay
                         }
                         loop_infinitely
                             if loop_infinitely == PlayerState::BattleMode
-                                || loop_infinitely == PlayerState::Falled =>
+                                || loop_infinitely == PlayerState::Falled
+                                || loop_infinitely == PlayerState::Run
+                                || loop_infinitely == PlayerState::Wait =>
                         {
-                            for &state in &[PlayerState::BattleMode, PlayerState::Falled] {
-                                if state != loop_infinitely && control_set.has_animation(state) {
+                            for &state in &[
+                                PlayerState::BattleMode,
+                                PlayerState::Falled,
+                                PlayerState::Run,
+                                PlayerState::Wait,
+                            ] {
+                                // Abort ids other than the infinite loop animation to be executed
+                                if state != loop_infinitely
+                                    // && state != PlayerState::Wait
+                                    && control_set.has_animation(state)
+                                {
                                     control_set.abort(state);
                                     log::info!("Abort '{:?}'", state);
                                 }
                             }
-                            add_animation(
-                                control_set,
-                                &animation_set,
-                                loop_infinitely,
-                                EndControl::Loop(None),
-                            );
+                            EndControl::Loop(None)
                         }
-                        _ => {}
+                        _ => EndControl::Loop(None),
                     };
+
+                    add_animation(control_set, &animation_set, next_state, end_control);
                 }
 
                 player.previous_state = next_state;
             }
             if input.action_is_down("enter").unwrap() {
-                player.push_state(PlayerState::Falling);
+                player.push_state(PlayerState::BattleMode);
             // add_animation(
             //     control_set,
             //     &animation_set,
@@ -99,7 +99,7 @@ impl<'s> System<'s> for PingCharaAnimationSystem {
                 // control_set.abort(PlayerState::Run);
             }
             if input.action_is_down("back").unwrap() {
-                player.push_state(PlayerState::BattleMode);
+                player.push_state(PlayerState::Run);
             }
         }
     }

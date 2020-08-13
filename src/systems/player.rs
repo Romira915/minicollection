@@ -75,11 +75,13 @@ impl<'s> System<'s> for PlayerSystem {
                 transform.scale_mut().x *= -1.0;
             }
 
-            if generaldata.velocity.x == 0.0 {
-                // p_player.state = PlayerState::Wait;
-            } else {
-                // p_player.state = PlayerState::Run;
-            }
+            // if generaldata.velocity.x == 0.0 {
+            //     p_player.push_state(PlayerState::Wait);
+            //     log::info!("player push Wait");
+            // } else {
+            //     p_player.push_state(PlayerState::Run);
+            //     log::info!("player push Run");
+            // }
         }
     }
 }
