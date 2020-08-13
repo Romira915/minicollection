@@ -11,6 +11,15 @@ use amethyst::{
     renderer::SpriteRender,
 };
 
+const ONE_LOOP_STATE: Vec<PlayerState> =
+    vec![PlayerState::Attack, PlayerState::Falling, PlayerState::Rise];
+const LOOP_INFINITELY: Vec<PlayerState> = vec![
+    PlayerState::BattleMode,
+    PlayerState::Falled,
+    PlayerState::Run,
+    PlayerState::Wait,
+];
+
 #[derive(SystemDesc)]
 pub struct PingCharaAnimationSystem;
 
@@ -38,9 +47,21 @@ impl<'s> System<'s> for PingCharaAnimationSystem {
             let control_set = animation::get_animation_set(&mut control_sets, entity).unwrap();
 
             if let Some(next_state) = player.state_queue.pop_front() {
+                for &s in &[
+                    PlayerState::Attack,
+                    PlayerState::BattleMode,
+                    PlayerState::Falled,
+                    PlayerState::Falling,
+                    PlayerState::Rise,
+                    PlayerState::Run,
+                    PlayerState::Wait,
+                ] {
+                    log::info!("has animation {:?} => {}", s, control_set.has_animation(s));
+                }
+                println!();
                 // Execute only when it is different from the previous state
                 if next_state != player.previous_state {
-                    let end_control = match next_state {
+                    match next_state {
                         one_loop_state
                             if one_loop_state == PlayerState::Attack
                                 || one_loop_state == PlayerState::Rise
@@ -54,7 +75,14 @@ impl<'s> System<'s> for PingCharaAnimationSystem {
                                     EndControl::Loop(None),
                                 );
                             }
-                            EndControl::Stay
+                            if !control_set.has_animation(one_loop_state) {
+                                add_animation(
+                                    control_set,
+                                    &animation_set,
+                                    one_loop_state,
+                                    EndControl::Stay,
+                                );
+                            }
                         }
                         loop_infinitely
                             if loop_infinitely == PlayerState::BattleMode
@@ -77,12 +105,18 @@ impl<'s> System<'s> for PingCharaAnimationSystem {
                                     log::info!("Abort '{:?}'", state);
                                 }
                             }
-                            EndControl::Loop(None)
-                        }
-                        _ => EndControl::Loop(None),
-                    };
 
-                    add_animation(control_set, &animation_set, next_state, end_control);
+                            if !control_set.has_animation(loop_infinitely) {
+                                add_animation(
+                                    control_set,
+                                    &animation_set,
+                                    loop_infinitely,
+                                    EndControl::Loop(None),
+                                );
+                            }
+                        }
+                        _ => {}
+                    };
                 }
 
                 player.previous_state = next_state;
@@ -154,4 +188,25 @@ fn add_animation<I, T>(
         1.0,
         AnimationCommand::Start,
     );
+}
+
+pub trait Include<T>
+where
+    T: Eq + PartialEq,
+{
+    fn include(&self, t: T) -> bool;
+}
+
+impl<T> Include<T> for Vec<T>
+where
+    T: PartialEq + Eq + Copy,
+{
+    fn include(&self, t: T) -> bool {
+        for &e in self {
+            if e == t {
+                return true;
+            }
+        }
+        false
+    }
 }
