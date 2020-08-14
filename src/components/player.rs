@@ -21,9 +21,9 @@ use amethyst::{
     utils::application_root_dir,
 };
 use serde::{Deserialize, Serialize};
-use std::collections::VecDeque;
+use std::{collections::VecDeque, slice::Iter};
 
-const QUEUE_CAPACITY: usize = 2;
+const QUEUE_CAPACITY: usize = 5;
 
 #[derive(Debug, Clone, Deserialize, PrefabData)]
 pub struct PlayerPrefabData {
@@ -52,6 +52,13 @@ pub enum PlayerState {
     Rise,
     Falling,
     Falled,
+}
+
+use PlayerState::*;
+impl PlayerState {
+    pub fn iter<'a>() -> Iter<'a, Self> {
+        [Wait, BattleMode, Run, Attack, Rise, Falling, Falled].iter()
+    }
 }
 
 impl Default for PlayerState {

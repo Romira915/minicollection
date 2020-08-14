@@ -1,6 +1,9 @@
+use crate::components::player::{PingPlayer, PlayerState};
 use amethyst::{
+    animation::{self, AnimationControlSet, AnimationSet},
     assets::{AssetStorage, Handle, Loader},
     core::{math::*, transform::Transform},
+    ecs::{Entities, Join, ReadStorage, WriteStorage},
     input::{
         self, is_close_requested, Button, ControllerButton, InputEvent, InputHandler,
         StringBindings, VirtualKeyCode,
@@ -14,7 +17,10 @@ pub struct PauseState;
 
 impl SimpleState for PauseState {
     fn on_start(&mut self, data: StateData<'_, GameData<'_, '_>>) {
-        println!("Pause");
+        let world = data.world;
+        log::info!("pause");
+
+        player_animation_control(world, "pause");
     }
 
     fn handle_event(
@@ -34,4 +40,38 @@ impl SimpleState for PauseState {
             _ => Trans::None,
         }
     }
+
+    fn on_stop(&mut self, data: StateData<'_, GameData<'_, '_>>) {
+        let world = data.world;
+
+        player_animation_control(world, "start");
+    }
+}
+
+fn player_animation_control(world: &mut World, command: &str) {
+    world.exec(
+        |(entities, players, animation_sets, mut control_sets): (
+            Entities,
+            ReadStorage<PingPlayer>,
+            ReadStorage<AnimationSet<PlayerState, SpriteRender>>,
+            WriteStorage<AnimationControlSet<PlayerState, SpriteRender>>,
+        )| {
+            for (entity, player, animation_set) in (&entities, &players, &animation_sets).join() {
+                let control_set = animation::get_animation_set(&mut control_sets, entity).unwrap();
+                for &state in PlayerState::iter() {
+                    if control_set.has_animation(state) {
+                        match command {
+                            "start" => {
+                                control_set.start(state);
+                            }
+                            "pause" => {
+                                control_set.pause(state);
+                            }
+                            _ => {}
+                        };
+                    }
+                }
+            }
+        },
+    );
 }

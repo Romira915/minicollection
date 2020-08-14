@@ -11,17 +11,11 @@ use amethyst::{
     renderer::SpriteRender,
 };
 
-const ONE_LOOP_STATE: Vec<PlayerState> =
-    vec![PlayerState::Attack, PlayerState::Falling, PlayerState::Rise];
-const LOOP_INFINITELY: Vec<PlayerState> = vec![
-    PlayerState::BattleMode,
-    PlayerState::Falled,
-    PlayerState::Run,
-    PlayerState::Wait,
-];
-
 #[derive(SystemDesc)]
-pub struct PingCharaAnimationSystem;
+pub struct PingCharaAnimationSystem {
+    one_loop_state_list: Vec<PlayerState>,
+    loop_infinitely_state_list: Vec<PlayerState>,
+}
 
 impl<'s> System<'s> for PingCharaAnimationSystem {
     type SystemData = (
@@ -59,53 +53,48 @@ impl<'s> System<'s> for PingCharaAnimationSystem {
                     log::info!("has animation {:?} => {}", s, control_set.has_animation(s));
                 }
                 println!();
+                // if next_state != player.previous_state {
+
                 // Execute only when it is different from the previous state
-                if next_state != player.previous_state {
-                    match next_state {
-                        one_loop_state
-                            if one_loop_state == PlayerState::Attack
-                                || one_loop_state == PlayerState::Rise
-                                || one_loop_state == PlayerState::Falling =>
-                        {
-                            if one_loop_state == PlayerState::Falling {
-                                add_animation(
-                                    control_set,
-                                    &animation_set,
-                                    PlayerState::Falled,
-                                    EndControl::Loop(None),
-                                );
-                            }
-                            if !control_set.has_animation(one_loop_state) {
-                                add_animation(
-                                    control_set,
-                                    &animation_set,
-                                    one_loop_state,
-                                    EndControl::Stay,
-                                );
-                            }
+                match next_state {
+                    one_loop_state if self.one_loop_state_list.include(one_loop_state) => {
+                        // if one_loop_state == PlayerState::Falling {
+                        //     add_animation(
+                        //         control_set,
+                        //         &animation_set,
+                        //         PlayerState::Falled,
+                        //         EndControl::Loop(None),
+                        //     );
+                        // }
+                        if !control_set.has_animation(one_loop_state) {
+                            add_animation(
+                                control_set,
+                                &animation_set,
+                                one_loop_state,
+                                EndControl::Stay,
+                            );
                         }
-                        loop_infinitely
-                            if loop_infinitely == PlayerState::BattleMode
-                                || loop_infinitely == PlayerState::Falled
-                                || loop_infinitely == PlayerState::Run
-                                || loop_infinitely == PlayerState::Wait =>
-                        {
-                            for &state in &[
-                                PlayerState::BattleMode,
-                                PlayerState::Falled,
-                                PlayerState::Run,
-                                PlayerState::Wait,
-                            ] {
-                                // Abort ids other than the infinite loop animation to be executed
-                                if state != loop_infinitely
+                        if one_loop_state == PlayerState::Falling {
+                            player.push_state(PlayerState::Falled);
+                        }
+                    }
+                    loop_infinitely if self.loop_infinitely_state_list.include(loop_infinitely) => {
+                        for &state in self.loop_infinitely_state_list.iter() {
+                            // Abort ids other than the infinite loop animation to be executed
+                            if state != loop_infinitely
                                     // && state != PlayerState::Wait
                                     && control_set.has_animation(state)
-                                {
-                                    control_set.abort(state);
-                                    log::info!("Abort '{:?}'", state);
-                                }
+                            {
+                                control_set.abort(state);
+                                log::info!("Abort '{:?}'", state);
                             }
-
+                        }
+                        for &state in self.one_loop_state_list.iter() {
+                            if control_set.has_animation(state) {
+                                player.push_state(loop_infinitely);
+                                log::info!("break add_animation");
+                                break;
+                            }
                             if !control_set.has_animation(loop_infinitely) {
                                 add_animation(
                                     control_set,
@@ -113,16 +102,17 @@ impl<'s> System<'s> for PingCharaAnimationSystem {
                                     loop_infinitely,
                                     EndControl::Loop(None),
                                 );
+                                log::info!("add_animation");
                             }
                         }
-                        _ => {}
-                    };
-                }
+                    }
+                    _ => {}
+                };
 
                 player.previous_state = next_state;
             }
             if input.action_is_down("enter").unwrap() {
-                player.push_state(PlayerState::BattleMode);
+                player.push_state(PlayerState::Attack);
             // add_animation(
             //     control_set,
             //     &animation_set,
@@ -135,6 +125,20 @@ impl<'s> System<'s> for PingCharaAnimationSystem {
             if input.action_is_down("back").unwrap() {
                 player.push_state(PlayerState::Run);
             }
+        }
+    }
+}
+
+impl Default for PingCharaAnimationSystem {
+    fn default() -> Self {
+        PingCharaAnimationSystem {
+            one_loop_state_list: vec![PlayerState::Attack, PlayerState::Falling, PlayerState::Rise],
+            loop_infinitely_state_list: vec![
+                PlayerState::BattleMode,
+                PlayerState::Falled,
+                PlayerState::Run,
+                PlayerState::Wait,
+            ],
         }
     }
 }

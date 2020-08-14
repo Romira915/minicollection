@@ -43,6 +43,7 @@ pub struct PingState<'a, 'b> {
     dispatcher: Option<Dispatcher<'a, 'b>>,
     progress_counter: Option<ProgressCounter>,
     entities: Vec<Entity>,
+    paused: bool,
 }
 
 impl<'a, 'b> SimpleState for PingState<'a, 'b> {
@@ -66,7 +67,11 @@ impl<'a, 'b> SimpleState for PingState<'a, 'b> {
         };
         let mut dispatcher_builder = DispatcherBuilder::new();
         dispatcher_builder.add(PlayerSystem, "player_system", &[]);
-        dispatcher_builder.add(PingCharaAnimationSystem, "chara_amimation_system", &[]);
+        dispatcher_builder.add(
+            PingCharaAnimationSystem::default(),
+            "chara_amimation_system",
+            &[],
+        );
         dispatcher_builder.add(
             ExclamationmarkSystem::default(),
             "exclamationmark_system",
@@ -144,6 +149,38 @@ impl<'a, 'b> SimpleState for PingState<'a, 'b> {
             _ => Trans::None,
         }
     }
+
+    fn on_pause(&mut self, data: StateData<'_, GameData<'_, '_>>) {
+        let world = data.world;
+        self.paused = true;
+
+        world.exec(
+            |(entities, players, animation_sets, mut control_sets): (
+                Entities,
+                ReadStorage<PingPlayer>,
+                ReadStorage<AnimationSet<PlayerState, SpriteRender>>,
+                WriteStorage<AnimationControlSet<PlayerState, SpriteRender>>,
+            )| {
+                for (entity, player, animation_set) in (&entities, &players, &animation_sets).join()
+                {
+                    let control_set =
+                        animation::get_animation_set(&mut control_sets, entity).unwrap();
+                    for &state in PlayerState::iter() {
+                        if control_set.has_animation(state) {
+                            control_set.pause(state);
+                        }
+                    }
+                }
+            },
+        );
+    }
+
+    fn on_resume(&mut self, data: StateData<'_, GameData<'_, '_>>) {
+        let world = data.world;
+        self.paused = false;
+
+        
+    }
 }
 
 use std::marker::{Send, Sync};
@@ -218,8 +255,6 @@ impl<'a, 'b> PingState<'a, 'b> {
                 )
                 .build(),
         );
-
-        
     }
     fn init_exclamationmark(&mut self, world: &mut World) {
         let (screen_width, screen_height) = super::get_screensize(world);
@@ -235,19 +270,22 @@ impl<'a, 'b> PingState<'a, 'b> {
             sprite_number: 0,
         };
 
-        let entity = world
-            .create_entity()
-            .with(transform)
-            .with(sprite_render)
-            .with(Hidden)
-            .build();
+        self.entities.push(
+            world
+                .create_entity()
+                .with(Exclamationmark)
+                .with(transform)
+                .with(sprite_render)
+                .with(Hidden)
+                .build(),
+        );
 
-        world.exec(|mut exclamationmark: WriteStorage<Exclamationmark>| {
-            exclamationmark
-                .insert(entity, Exclamationmark)
-                .expect("Failed to Exclamationmark insert");
-        });
-        self.entities.push(entity);
+        // world.exec(|mut exclamationmark: WriteStorage<Exclamationmark>| {
+        //     exclamationmark
+        //         .insert(entity, Exclamationmark)
+        //         .expect("Failed to Exclamationmark insert");
+        // });
+        // self.entities.push(entity);
         // world.add_resource(ExclamationmarkResources::new(sprite_render, transform));
     }
     fn init_backgrounds(&mut self, world: &mut World) {
