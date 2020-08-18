@@ -74,14 +74,18 @@ impl<'s> System<'s> for PlayerSystem {
             if generaldata.velocity.x * -transform.scale().x < 0.0 {
                 transform.scale_mut().x *= -1.0;
             }
-
-            // if generaldata.velocity.x == 0.0 {
-            //     p_player.push_state(PlayerState::Wait);
-            //     log::info!("player push Wait");
-            // } else {
-            //     p_player.push_state(PlayerState::Run);
-            //     log::info!("player push Run");
-            // }
+            
+            // Animation transition with priority
+            if generaldata.velocity.x != 0.0 {
+                p_player.push_state(PlayerState::Run);
+                log::info!("player push Run");
+            } else if p_player.is_on_stage {
+                p_player.push_state(PlayerState::BattleMode);
+                log::info!("player push BattleMode");
+            } else {
+                p_player.push_state(PlayerState::Wait);
+                log::info!("player push Wait");
+            }
         }
     }
 }

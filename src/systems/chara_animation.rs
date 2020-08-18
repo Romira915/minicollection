@@ -123,7 +123,7 @@ impl<'s> System<'s> for PingCharaAnimationSystem {
                 // control_set.abort(PlayerState::Run);
             }
             if input.action_is_down("back").unwrap() {
-                player.push_state(PlayerState::Run);
+                player.push_state(PlayerState::Rise);
             }
         }
     }
