@@ -56,7 +56,7 @@ fn player_animation_control(world: &mut World, command: &str) {
             ReadStorage<AnimationSet<PlayerState, SpriteRender>>,
             WriteStorage<AnimationControlSet<PlayerState, SpriteRender>>,
         )| {
-            for (entity, player, animation_set) in (&entities, &players, &animation_sets).join() {
+            for (entity, _, _) in (&entities, &players, &animation_sets).join() {
                 let control_set = animation::get_animation_set(&mut control_sets, entity).unwrap();
                 for &state in PlayerState::iter() {
                     if control_set.has_animation(state) {

@@ -25,6 +25,9 @@
     "rotation": [ [Key(Space)] ],
     "enter": [ [Controller(0, A)] ],
     "back": [ [Controller(0, B)] ],
-    "pause": [ [Controller(0, Start)] ]
+    "pause": [ [Controller(0, Start)] ],
+    "enter_p2": [ [Controller(1, A)] ],
+    "back_p2": [ [Controller(1, B)] ],
+    "pause_p2": [ [Controller(1, Start)] ],
   },
 )

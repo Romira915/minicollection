@@ -153,33 +153,11 @@ impl<'a, 'b> SimpleState for PingState<'a, 'b> {
     fn on_pause(&mut self, data: StateData<'_, GameData<'_, '_>>) {
         let world = data.world;
         self.paused = true;
-
-        world.exec(
-            |(entities, players, animation_sets, mut control_sets): (
-                Entities,
-                ReadStorage<PingPlayer>,
-                ReadStorage<AnimationSet<PlayerState, SpriteRender>>,
-                WriteStorage<AnimationControlSet<PlayerState, SpriteRender>>,
-            )| {
-                for (entity, player, animation_set) in (&entities, &players, &animation_sets).join()
-                {
-                    let control_set =
-                        animation::get_animation_set(&mut control_sets, entity).unwrap();
-                    for &state in PlayerState::iter() {
-                        if control_set.has_animation(state) {
-                            control_set.pause(state);
-                        }
-                    }
-                }
-            },
-        );
     }
 
     fn on_resume(&mut self, data: StateData<'_, GameData<'_, '_>>) {
         let world = data.world;
         self.paused = false;
-
-        
     }
 }
 

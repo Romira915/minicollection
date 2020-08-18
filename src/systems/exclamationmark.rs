@@ -41,7 +41,7 @@ impl<'s> System<'s> for ExclamationmarkSystem {
         //         .build();
         // }
 
-        if self.count_frame == self.spanw_frame {
+        if self.count_frame == self.spanw_frame && !self.pressed {
             for (entity, _) in (&entities, &exclamationmarks).join() {
                 hiddens
                     .remove(entity)
@@ -54,7 +54,7 @@ impl<'s> System<'s> for ExclamationmarkSystem {
             if let Some(enter) = input.action_is_down("enter") {
                 self.pressed = enter;
             }
-        }
+        } 
     }
 }
 
