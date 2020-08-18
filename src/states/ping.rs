@@ -1,7 +1,7 @@
 use crate::{
     components::{
         backgrounds::*,
-        exclamationmark::{Exclamationmark, ExclamationmarkResources},
+        exclamationmark::{Exclamationmark, ExclamationmarkResources, PingEvent},
         player::*,
         stages::*,
         GeneralData, Gravity,
@@ -28,6 +28,7 @@ use amethyst::{
     },
     prelude::*,
     renderer::{Camera, ImageFormat, SpriteRender, SpriteSheet, SpriteSheetFormat, Texture},
+    shrev::EventChannel,
     window::ScreenDimensions,
 };
 
@@ -50,6 +51,7 @@ impl<'a, 'b> SimpleState for PingState<'a, 'b> {
     fn on_start(&mut self, data: StateData<'_, GameData<'_, '_>>) {
         let world = data.world;
         self.progress_counter = Some(Default::default());
+        let channel = EventChannel::<PingEvent>::new();
 
         let world_def = {
             let screen_size = super::get_screensize(world);
@@ -59,6 +61,7 @@ impl<'a, 'b> SimpleState for PingState<'a, 'b> {
             }
         };
         world.add_resource(world_def);
+        world.add_resource(channel);
 
         use crate::systems::{
             backgrounds::BackgroundsSystem, chara_animation::PingCharaAnimationSystem,
@@ -178,8 +181,6 @@ impl<'a, 'b> SimpleState for PingState<'a, 'b> {
     fn on_resume(&mut self, data: StateData<'_, GameData<'_, '_>>) {
         let world = data.world;
         self.paused = false;
-
-        
     }
 }
 
