@@ -4,10 +4,44 @@ pub mod ping;
 
 use amethyst::{
     assets::{AssetStorage, Handle, Loader, ProgressCounter},
+    core::{
+        shrev::{EventChannel, ReaderId},
+        EventReader,
+    },
+    derive::EventReader,
+    ecs::{Read, SystemData},
+    input::{BindingTypes, InputEvent, StringBindings},
     prelude::*,
     renderer::{ImageFormat, SpriteRender, SpriteSheet, SpriteSheetFormat, Texture},
+    ui::UiEvent,
     window::ScreenDimensions,
+    winit::Event,
 };
+
+#[derive(Clone, Debug, EventReader)]
+#[reader(ExtendedStateEventReader)]
+pub enum ExtendedStateEvent<T = StringBindings>
+where
+    T: BindingTypes + Clone,
+{
+    /// Events sent by the winit window.
+    Window(Event),
+    /// Events sent by the ui system.
+    Ui(UiEvent),
+    /// Events sent by the input system.
+    Input(InputEvent<T>),
+    /// Our own events for our own game logic
+    Ping(PingEvent),
+}
+
+#[derive(Clone, Debug, PartialEq)]
+pub enum PingEvent {
+    P1Win,
+    P2Win,
+    Draw,
+    P1Flying,
+    P2Flying,
+}
 
 fn load_sprite_sheet(
     world: &mut World,

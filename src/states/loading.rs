@@ -1,4 +1,4 @@
-use crate::components::player::PlayerState;
+use crate::{components::player::PlayerState, states::ExtendedStateEvent};
 use amethyst::{
     animation::{
         self, AnimationCommand, AnimationControlSet, AnimationSet, EndControl, StepDirection,
@@ -26,7 +26,7 @@ pub struct LoadingState {
     loading_inside: Option<Entity>,
 }
 
-impl SimpleState for LoadingState {
+impl<'a, 'b> State<GameData<'a, 'b>, ExtendedStateEvent> for LoadingState {
     fn on_start(&mut self, data: StateData<'_, GameData<'_, '_>>) {
         let mut world = data.world;
 
@@ -35,9 +35,15 @@ impl SimpleState for LoadingState {
         }));
     }
 
-    fn update(&mut self, data: &mut StateData<'_, GameData<'_, '_>>) -> SimpleTrans {
-        // let StateData { world, .. } = data;
+    fn update(
+        &mut self,
+        mut data: StateData<'_, GameData<'_, '_>>,
+    ) -> Trans<GameData<'a, 'b>, ExtendedStateEvent> {
         let world = &mut data.world;
+        // It is absolutely necessary
+        data.data.update(world);
+
+        // let StateData { world, .. } = data;
         let ref_progress_counter = self.progress_counter.as_ref().unwrap();
 
         if ref_progress_counter.is_complete() {
@@ -50,7 +56,6 @@ impl SimpleState for LoadingState {
                     for (entity, animation_set) in (&entities, &animation_sets).join() {
                         let control_set =
                             animation::get_animation_set(&mut control_sets, entity).unwrap();
-                            
                         control_set.add_animation(
                             PlayerState::Wait,
                             &animation_set.get(&PlayerState::Wait).unwrap(),

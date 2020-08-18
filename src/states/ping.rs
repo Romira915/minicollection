@@ -1,12 +1,12 @@
 use crate::{
     components::{
         backgrounds::*,
-        exclamationmark::{Exclamationmark, ExclamationmarkResources, PingEvent},
+        exclamationmark::{Exclamationmark, ExclamationmarkResources},
         player::*,
         stages::*,
         GeneralData, Gravity,
     },
-    states::{loading::LoadingState, pause::PauseState},
+    states::{loading::LoadingState, pause::PauseState, ExtendedStateEvent, PingEvent},
     WorldDef,
 };
 use amethyst::{
@@ -17,19 +17,26 @@ use amethyst::{
         AssetStorage, Handle, Loader, PrefabData, PrefabLoader, PrefabLoaderSystemDesc,
         ProgressCounter, RonFormat,
     },
-    core::{math::*, transform::Transform, ArcThreadPool, Hidden},
+    core::{
+        math::*,
+        shrev::{EventChannel, ReaderId},
+        transform::Transform,
+        ArcThreadPool, EventReader, Hidden,
+    },
+    derive::EventReader,
     ecs::{
-        prelude::Entity, Component, Dispatcher, DispatcherBuilder, Entities, Join, ReadStorage,
-        WriteStorage,
+        prelude::Entity, Component, Dispatcher, DispatcherBuilder, Entities, Join, Read,
+        ReadStorage, SystemData, World, WriteStorage,
     },
     input::{
-        self, is_close_requested, Button, ControllerButton, InputEvent, InputHandler,
+        self, is_close_requested, BindingTypes, Button, ControllerButton, InputEvent, InputHandler,
         StringBindings, VirtualKeyCode,
     },
     prelude::*,
     renderer::{Camera, ImageFormat, SpriteRender, SpriteSheet, SpriteSheetFormat, Texture},
-    shrev::EventChannel,
+    ui::UiEvent,
     window::ScreenDimensions,
+    winit::Event,
 };
 
 const PING_PLAYER_SCALE: f32 = 5.0;
@@ -47,11 +54,10 @@ pub struct PingState<'a, 'b> {
     paused: bool,
 }
 
-impl<'a, 'b> SimpleState for PingState<'a, 'b> {
+impl<'a, 'b, 'c, 'd> State<GameData<'c, 'd>, ExtendedStateEvent> for PingState<'a, 'b> {
     fn on_start(&mut self, data: StateData<'_, GameData<'_, '_>>) {
         let world = data.world;
         self.progress_counter = Some(Default::default());
-        let channel = EventChannel::<PingEvent>::new();
 
         let world_def = {
             let screen_size = super::get_screensize(world);
@@ -61,7 +67,6 @@ impl<'a, 'b> SimpleState for PingState<'a, 'b> {
             }
         };
         world.add_resource(world_def);
-        world.add_resource(channel);
 
         use crate::systems::{
             backgrounds::BackgroundsSystem, chara_animation::PingCharaAnimationSystem,
@@ -108,8 +113,14 @@ impl<'a, 'b> SimpleState for PingState<'a, 'b> {
             .expect("Failed to remove PingState");
     }
 
-    fn update(&mut self, data: &mut StateData<'_, GameData<'_, '_>>) -> SimpleTrans {
+    fn update(
+        &mut self,
+        mut data: StateData<'_, GameData<'_, '_>>,
+    ) -> Trans<GameData<'c, 'd>, ExtendedStateEvent> {
         let world = &mut data.world;
+        // It is absolutely necessary
+        data.data.update(world);
+
 
         if let Some(progress_counter) = self.progress_counter.as_ref() {
             if !progress_counter.is_complete() {
@@ -129,17 +140,17 @@ impl<'a, 'b> SimpleState for PingState<'a, 'b> {
     fn handle_event(
         &mut self,
         _data: StateData<'_, GameData<'_, '_>>,
-        event: StateEvent,
-    ) -> SimpleTrans {
+        event: ExtendedStateEvent,
+    ) -> Trans<GameData<'c, 'd>, ExtendedStateEvent> {
         match event {
-            StateEvent::Window(e) => {
+            ExtendedStateEvent::Window(e) => {
                 if is_close_requested(&e) {
                     Trans::Quit
                 } else {
                     Trans::None
                 }
             }
-            StateEvent::Input(e) => match e {
+            ExtendedStateEvent::Input(e) => match e {
                 InputEvent::ControllerButtonPressed {
                     which: _,
                     button: ControllerButton::Start,

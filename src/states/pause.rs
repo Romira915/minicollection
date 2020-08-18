@@ -1,4 +1,7 @@
-use crate::components::player::{PingPlayer, PlayerState};
+use crate::{
+    components::player::{PingPlayer, PlayerState},
+    states::ExtendedStateEvent,
+};
 use amethyst::{
     animation::{self, AnimationControlSet, AnimationSet},
     assets::{AssetStorage, Handle, Loader},
@@ -15,7 +18,7 @@ use amethyst::{
 
 pub struct PauseState;
 
-impl SimpleState for PauseState {
+impl<'a, 'b> State<GameData<'a, 'b>, ExtendedStateEvent> for PauseState {
     fn on_start(&mut self, data: StateData<'_, GameData<'_, '_>>) {
         let world = data.world;
         log::info!("pause");
@@ -26,10 +29,10 @@ impl SimpleState for PauseState {
     fn handle_event(
         &mut self,
         _data: StateData<'_, GameData<'_, '_>>,
-        event: StateEvent,
-    ) -> SimpleTrans {
+        event: ExtendedStateEvent,
+    ) -> Trans<GameData<'a, 'b>, ExtendedStateEvent> {
         match event {
-            StateEvent::Input(e) => match e {
+            ExtendedStateEvent::Input(e) => match e {
                 InputEvent::ControllerButtonPressed {
                     which: _,
                     button: ControllerButton::Start,

@@ -12,15 +12,6 @@ use amethyst::{
 };
 use rand::rngs::ThreadRng;
 
-#[derive(Debug)]
-pub enum PingEvent {
-    P1Win,
-    P2Win,
-    Draw,
-    P1Flying,
-    P2Flying,
-}
-
 pub struct ExclamationmarkSystem {
     spanw_frame: usize,
     count_frame: usize,
@@ -35,13 +26,9 @@ impl<'s> System<'s> for ExclamationmarkSystem {
         WriteStorage<'s, Hidden>,
         Read<'s, InputHandler<StringBindings>>,
         Read<'s, Time>,
-        WriteExpect<'s, PingEvent>,
     );
 
-    fn run(
-        &mut self,
-        (entities, exclamationmarks, mut hiddens, input, time, mut channel): Self::SystemData,
-    ) {
+    fn run(&mut self, (entities, exclamationmarks, mut hiddens, input, time): Self::SystemData) {
         self.count_frame += 1;
         // if self.count_frame == crate::FRAME_RATE * self.spanw_frame {
         //     entities
@@ -67,9 +54,8 @@ impl<'s> System<'s> for ExclamationmarkSystem {
 
             if let Some(enter) = input.action_is_down("enter") {
                 self.pressed = enter;
-                channel.single_write(PingEvent::P1Win);
             }
-        } 
+        }
     }
 }
 

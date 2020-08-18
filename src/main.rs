@@ -15,7 +15,11 @@ use amethyst::{
 };
 
 extern crate minicollection as lib;
-use lib::{bundle::Bundle, components::player::*, states::ping::PingState};
+use lib::{
+    bundle::Bundle,
+    components::player::*,
+    states::{ping::PingState, *},
+};
 
 fn main() -> amethyst::Result<()> {
     amethyst::start_logger(Default::default());
@@ -55,10 +59,16 @@ fn main() -> amethyst::Result<()> {
         ))?
         .with_bundle(Bundle)?;
 
-    let mut game = Application::build(assets_dir, PingState::default())?
-        .with_frame_limit(FrameRateLimitStrategy::Yield, lib::FRAME_RATE as u32)
-        .build(game_data)?;
     // let mut game = Application::new(assets_dir, PingState::default(), game_data)?;
+    // let mut game = Application::build(assets_dir, PingState::default())?
+    //     .with_frame_limit(FrameRateLimitStrategy::Yield, lib::FRAME_RATE as u32)
+    //     .build(game_data)?;
+    let mut game = CoreApplication::<_, ExtendedStateEvent, ExtendedStateEventReader>::build(
+        assets_dir,
+        PingState::default(),
+    )?
+    .with_frame_limit(FrameRateLimitStrategy::Yield, lib::FRAME_RATE as u32)
+    .build(game_data)?;
     game.run();
 
     Ok(())
