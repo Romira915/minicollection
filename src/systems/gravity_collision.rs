@@ -18,7 +18,8 @@ impl<'s> System<'s> for GravityCollisionSystem {
         ReadStorage<'s, Gravity>,
         WriteStorage<'s, GeneralData>,
     );
-
+    
+    // WARN: 他のシステムに流用できない可能性がある
     fn run(
         &mut self,
         (mut players, stages, mut transforms, gravity, mut generaldatas): Self::SystemData,

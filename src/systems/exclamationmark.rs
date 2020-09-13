@@ -1,4 +1,4 @@
-use crate::components::exclamationmark::*;
+use crate::{components::exclamationmark::*, states::PingEvent};
 use amethyst::{
     core::{math::*, timing::Time, Hidden, SystemDesc, Transform},
     derive::SystemDesc,
@@ -26,9 +26,14 @@ impl<'s> System<'s> for ExclamationmarkSystem {
         WriteStorage<'s, Hidden>,
         Read<'s, InputHandler<StringBindings>>,
         Read<'s, Time>,
+        Write<'s, EventChannel<PingEvent>>,
     );
 
-    fn run(&mut self, (entities, exclamationmarks, mut hiddens, input, time): Self::SystemData) {
+    // TODO: 早押し判定システム実装
+    fn run(
+        &mut self,
+        (entities, exclamationmarks, mut hiddens, input, time, mut channel): Self::SystemData,
+    ) {
         self.count_frame += 1;
         // if self.count_frame == crate::FRAME_RATE * self.spanw_frame {
         //     entities
@@ -41,7 +46,8 @@ impl<'s> System<'s> for ExclamationmarkSystem {
         //         .with(exclamationmark_resources.transform.clone(), &mut transforms)
         //         .build();
         // }
-
+        
+        // When it appears
         if self.count_frame == self.spanw_frame && !self.pressed {
             for (entity, _) in (&entities, &exclamationmarks).join() {
                 hiddens
@@ -49,11 +55,29 @@ impl<'s> System<'s> for ExclamationmarkSystem {
                     .expect("Failed to exclamationmark remove hidden");
             }
         }
+
+        // After appearing
         if self.count_frame >= self.spanw_frame && !self.pressed {
             self.past_frame += 1;
 
+            let mut p1 = false;
+            let mut p2 = false;
+
             if let Some(enter) = input.action_is_down("enter") {
-                self.pressed = enter;
+                p1 = enter;
+            }
+            if let Some(enter) = input.action_is_down("enter_p2") {
+                p2 = enter;
+            }
+            if p1 && p2 {
+                channel.single_write(PingEvent::Draw);
+            } else if p1 {
+                channel.single_write(PingEvent::P1Win);
+            } else if p2 {
+                channel.single_write(PingEvent::P2Win);
+            }
+            if p1 || p2 {
+                self.pressed = true;
             }
         }
     }

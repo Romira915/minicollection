@@ -50,9 +50,9 @@ impl<'s> System<'s> for PingCharaAnimationSystem {
                     PlayerState::Run,
                     PlayerState::Wait,
                 ] {
-                    log::info!("has animation {:?} => {}", s, control_set.has_animation(s));
+                    // log::info!("has animation {:?} => {}", s, control_set.has_animation(s));
                 }
-                println!();
+                // println!();
                 // if next_state != player.previous_state {
 
                 // Execute only when it is different from the previous state
@@ -92,7 +92,6 @@ impl<'s> System<'s> for PingCharaAnimationSystem {
                         for &state in self.one_loop_state_list.iter() {
                             if control_set.has_animation(state) {
                                 player.push_state(loop_infinitely);
-                                log::info!("break add_animation");
                                 break;
                             }
                             if !control_set.has_animation(loop_infinitely) {

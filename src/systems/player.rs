@@ -78,13 +78,13 @@ impl<'s> System<'s> for PlayerSystem {
             // Animation transition with priority
             if generaldata.velocity.x != 0.0 {
                 p_player.push_state(PlayerState::Run);
-                log::info!("player push Run");
+                // log::info!("player push Run");
             } else if p_player.is_on_stage {
                 p_player.push_state(PlayerState::BattleMode);
-                log::info!("player push BattleMode");
+                // log::info!("player push BattleMode");
             } else {
                 p_player.push_state(PlayerState::Wait);
-                log::info!("player push Wait");
+                // log::info!("player push Wait");
             }
         }
     }

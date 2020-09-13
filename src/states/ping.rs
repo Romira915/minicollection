@@ -121,7 +121,6 @@ impl<'a, 'b, 'c, 'd> State<GameData<'c, 'd>, ExtendedStateEvent> for PingState<'
         // It is absolutely necessary
         data.data.update(world);
 
-
         if let Some(progress_counter) = self.progress_counter.as_ref() {
             if !progress_counter.is_complete() {
                 let mut progress_counter = None;
@@ -157,6 +156,29 @@ impl<'a, 'b, 'c, 'd> State<GameData<'c, 'd>, ExtendedStateEvent> for PingState<'
                 }
                 | InputEvent::ButtonPressed(Button::Key(VirtualKeyCode::Escape)) => {
                     Trans::Push(Box::new(PauseState))
+                }
+                _ => Trans::None,
+            },
+            ExtendedStateEvent::Ping(e) => match e {
+                PingEvent::P1Win => {
+                    log::info!("P1 Win");
+                    Trans::None
+                }
+                PingEvent::P2Win => {
+                    log::info!("P2 Win");
+                    Trans::None
+                }
+                PingEvent::Draw => {
+                    log::info!("Draw");
+                    Trans::None
+                }
+                PingEvent::P1Flying => {
+                    log::info!("P1 Flying");
+                    Trans::None
+                }
+                PingEvent::P2Flying => {
+                    log::info!("P2 Flying");
+                    Trans::None
                 }
                 _ => Trans::None,
             },
