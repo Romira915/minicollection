@@ -66,7 +66,9 @@ impl<'a, 'b, 'c, 'd> State<GameData<'c, 'd>, ExtendedStateEvent> for PingState<'
                 screen_height: screen_size.1,
             }
         };
-        world.add_resource(world_def);
+
+        // world.add_resource(world_def);
+        world.insert(world_def); // NOTE: changed by rust-analyzer
 
         use crate::systems::{
             backgrounds::BackgroundsSystem, chara_animation::PingCharaAnimationSystem,

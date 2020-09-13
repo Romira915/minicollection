@@ -1,4 +1,7 @@
-use crate::{components::exclamationmark::*, states::PingEvent};
+use crate::{
+    components::{exclamationmark::*, player::*},
+    states::PingEvent,
+};
 use amethyst::{
     core::{math::*, timing::Time, Hidden, SystemDesc, Transform},
     derive::SystemDesc,
@@ -27,12 +30,13 @@ impl<'s> System<'s> for ExclamationmarkSystem {
         Read<'s, InputHandler<StringBindings>>,
         Read<'s, Time>,
         Write<'s, EventChannel<PingEvent>>,
+        WriteStorage<'s, PingPlayer>,
     );
 
     // TODO: 早押し判定システム実装
     fn run(
         &mut self,
-        (entities, exclamationmarks, mut hiddens, input, time, mut channel): Self::SystemData,
+        (entities, exclamationmarks, mut hiddens, input, time, mut channel, mut players): Self::SystemData,
     ) {
         self.count_frame += 1;
         // if self.count_frame == crate::FRAME_RATE * self.spanw_frame {
@@ -46,8 +50,72 @@ impl<'s> System<'s> for ExclamationmarkSystem {
         //         .with(exclamationmark_resources.transform.clone(), &mut transforms)
         //         .build();
         // }
-        
-        // When it appears
+
+        let mut push_anime = |p: PlayerNumber, s: PlayerState| {
+            for (player) in (&mut players).join() {
+                if player.player_num == p {
+                    player.push_state(s.clone());
+                }
+            }
+        };
+        let when_appearing = |before: bool| {
+            let mut p1 = false;
+            let mut p2 = false;
+
+            if let Some(enter) = input.action_is_down("enter") {
+                p1 = enter;
+            }
+            if let Some(enter) = input.action_is_down("enter_p2") {
+                p2 = enter;
+            }
+            if p1 && p2 {
+                channel.single_write(PingEvent::Draw);
+            } else if p1 {
+                channel.single_write(if before {
+                    PingEvent::P1Flying
+                } else {
+                    PingEvent::P1Win
+                });
+                push_anime(PlayerNumber::P1, PlayerState::Attack);
+            } else if p2 {
+                channel.single_write(if before {
+                    PingEvent::P1Flying
+                } else {
+                    PingEvent::P1Win
+                });
+                push_anime(PlayerNumber::P2, PlayerState::Attack);
+            }
+            if p1 || p2 {
+                self.pressed = true;
+            }
+        };
+
+        // Before appearing exclamationmark
+        if self.count_frame <= self.spanw_frame && !self.pressed {
+            let mut p1 = false;
+            let mut p2 = false;
+
+            if let Some(enter) = input.action_is_down("enter") {
+                p1 = enter;
+            }
+            if let Some(enter) = input.action_is_down("enter_p2") {
+                p2 = enter;
+            }
+            if p1 && p2 {
+                channel.single_write(PingEvent::Draw);
+            } else if p1 {
+                channel.single_write(PingEvent::P1Flying);
+                push_anime(PlayerNumber::P1, PlayerState::Attack);
+            } else if p2 {
+                channel.single_write(PingEvent::P2Flying);
+                push_anime(PlayerNumber::P2, PlayerState::Attack);
+            }
+            if p1 || p2 {
+                self.pressed = true;
+            }
+        }
+
+        // When it appears exclamationmark
         if self.count_frame == self.spanw_frame && !self.pressed {
             for (entity, _) in (&entities, &exclamationmarks).join() {
                 hiddens
@@ -56,7 +124,7 @@ impl<'s> System<'s> for ExclamationmarkSystem {
             }
         }
 
-        // After appearing
+        // After appearing exclamationmark
         if self.count_frame >= self.spanw_frame && !self.pressed {
             self.past_frame += 1;
 

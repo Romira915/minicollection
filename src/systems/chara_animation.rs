@@ -110,20 +110,22 @@ impl<'s> System<'s> for PingCharaAnimationSystem {
 
                 player.previous_state = next_state;
             }
-            if input.action_is_down("enter").unwrap() {
-                player.push_state(PlayerState::Attack);
-            // add_animation(
-            //     control_set,
-            //     &animation_set,
-            //     PlayerState::Falling,
-            //     EndControl::Stay,
-            // );
-            } else {
-                // control_set.abort(PlayerState::Run);
-            }
-            if input.action_is_down("back").unwrap() {
-                player.push_state(PlayerState::Rise);
-            }
+
+            // NOTE: テスト機構
+            // if input.action_is_down("enter").unwrap() {
+            //     player.push_state(PlayerState::Attack);
+            // // add_animation(
+            // //     control_set,
+            // //     &animation_set,
+            // //     PlayerState::Falling,
+            // //     EndControl::Stay,
+            // // );
+            // } else {
+            //     // control_set.abort(PlayerState::Run);
+            // }
+            // if input.action_is_down("back").unwrap() {
+            //     player.push_state(PlayerState::Rise);
+            // }
         }
     }
 }
