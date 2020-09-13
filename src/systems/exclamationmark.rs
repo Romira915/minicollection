@@ -33,7 +33,8 @@ impl<'s> System<'s> for ExclamationmarkSystem {
         WriteStorage<'s, PingPlayer>,
     );
 
-    // TODO: 早押し判定システム実装
+    // doneTODO: 早押し判定システム実装
+    // TODO: 経過フレーム・勝敗UI実装
     fn run(
         &mut self,
         (entities, exclamationmarks, mut hiddens, input, time, mut channel, mut players): Self::SystemData,
