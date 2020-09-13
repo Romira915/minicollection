@@ -58,7 +58,11 @@ impl<'s> System<'s> for ExclamationmarkSystem {
                 }
             }
         };
-        let when_appearing = |before: bool| {
+
+        // Processing when the button is pressed
+        // arg: Before the exclamation mark spanned
+        // Return if someone pressed: bool
+        let mut process_when_pressed = |before: bool | {
             let mut p1 = false;
             let mut p2 = false;
 
@@ -79,40 +83,21 @@ impl<'s> System<'s> for ExclamationmarkSystem {
                 push_anime(PlayerNumber::P1, PlayerState::Attack);
             } else if p2 {
                 channel.single_write(if before {
-                    PingEvent::P1Flying
+                    PingEvent::P2Flying
                 } else {
-                    PingEvent::P1Win
+                    PingEvent::P2Win
                 });
                 push_anime(PlayerNumber::P2, PlayerState::Attack);
             }
             if p1 || p2 {
-                self.pressed = true;
+                return true;
             }
+            false
         };
 
         // Before appearing exclamationmark
         if self.count_frame <= self.spanw_frame && !self.pressed {
-            let mut p1 = false;
-            let mut p2 = false;
-
-            if let Some(enter) = input.action_is_down("enter") {
-                p1 = enter;
-            }
-            if let Some(enter) = input.action_is_down("enter_p2") {
-                p2 = enter;
-            }
-            if p1 && p2 {
-                channel.single_write(PingEvent::Draw);
-            } else if p1 {
-                channel.single_write(PingEvent::P1Flying);
-                push_anime(PlayerNumber::P1, PlayerState::Attack);
-            } else if p2 {
-                channel.single_write(PingEvent::P2Flying);
-                push_anime(PlayerNumber::P2, PlayerState::Attack);
-            }
-            if p1 || p2 {
-                self.pressed = true;
-            }
+            self.pressed = process_when_pressed(true);
         }
 
         // When it appears exclamationmark
@@ -128,25 +113,7 @@ impl<'s> System<'s> for ExclamationmarkSystem {
         if self.count_frame >= self.spanw_frame && !self.pressed {
             self.past_frame += 1;
 
-            let mut p1 = false;
-            let mut p2 = false;
-
-            if let Some(enter) = input.action_is_down("enter") {
-                p1 = enter;
-            }
-            if let Some(enter) = input.action_is_down("enter_p2") {
-                p2 = enter;
-            }
-            if p1 && p2 {
-                channel.single_write(PingEvent::Draw);
-            } else if p1 {
-                channel.single_write(PingEvent::P1Win);
-            } else if p2 {
-                channel.single_write(PingEvent::P2Win);
-            }
-            if p1 || p2 {
-                self.pressed = true;
-            }
+            self.pressed = process_when_pressed(false);
         }
     }
 }
