@@ -45,32 +45,32 @@ Container(
                         ),
                     ),
                 ),
-                // Label(
-                //     transform: (
-                //         id: "past_frame",
-                //         x: -50.,
-                //         y: -20.,
-                //         z: -1.0,
-                //         width: 609,
-                //         height: 93.34,
-                //         tab_order: 1,
-                //         anchor: Top,
-                //         mouse_reactive: false,
-                //         hidden: true,
-                //     ),
-                //     text: (
-                //         text: "0",
-                //         font: File("font/rounded-mplus-1p-bold.ttf", ("TTF", ())),
-                //         font_size: 70.,
-                //         color: (1.0, 1.0, 1.0, 1.0),
-                //         align: Top,
-                //         editable: (
-                //             max_length: 100,
-                //             selected_text_color: (0.09, 0.02, 0.25, 1.0),
-                //             selected_background_color: (1.0, 0.5, 0.8, 1.0),
-                //         ),
-                //     )
-                // ),
+                Label(
+                    transform: (
+                        id: "past_frame",
+                        x: -50.,
+                        y: -20.,
+                        z: -1.0,
+                        width: 609,
+                        height: 93.34,
+                        tab_order: 1,
+                        anchor: Top,
+                        mouse_reactive: false,
+                        hidden: true,
+                    ),
+                    text: (
+                        text: "0",
+                        font: File("font/rounded-mplus-1p-bold.ttf", ("TTF", ())),
+                        font_size: 70.,
+                        color: (1.0, 1.0, 1.0, 1.0),
+                        align: Top,
+                        editable: (
+                            max_length: 100,
+                            selected_text_color: (0.09, 0.02, 0.25, 1.0),
+                            selected_background_color: (1.0, 0.5, 0.8, 1.0),
+                        ),
+                    ),
+                ),
             ],
         )
     ],

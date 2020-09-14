@@ -165,19 +165,19 @@ impl<'a, 'b, 'c, 'd> State<GameData<'c, 'd>, ExtendedStateEvent> for PingState<'
                 score.text = format!("{}", score.text.parse::<i32>().unwrap_or(0) + 1);
             }
         }
-        // if self.past_ui.is_none() {
-        //     world.exec(|finder: UiFinder| {
-        //         if let Some(entity) = finder.find("past_frame") {
-        //             self.past_ui = Some(entity);
-        //         }
-        //     })
-        // } else {
-        //     let mut ui_text = world.write_storage::<UiText>();
+        if self.past_ui.is_none() {
+            world.exec(|finder: UiFinder| {
+                if let Some(entity) = finder.find("past_frame") {
+                    self.past_ui = Some(entity);
+                }
+            })
+        } else {
+            let mut ui_text = world.write_storage::<UiText>();
 
-        //     if let Some(score) = ui_text.get_mut(self.past_ui.unwrap()) {
-        //         score.text = format!("{}", score.text.parse::<i32>().unwrap_or(0) + 1);
-        //     }
-        // }
+            if let Some(score) = ui_text.get_mut(self.past_ui.unwrap()) {
+                score.text = format!("{}", score.text.parse::<i32>().unwrap_or(0) + 1);
+            }
+        }
 
         Trans::None
     }
@@ -186,25 +186,30 @@ impl<'a, 'b, 'c, 'd> State<GameData<'c, 'd>, ExtendedStateEvent> for PingState<'
         let world = data.world;
 
         // doneTODO: ポーズ時にuiをHideする
+        let ui_entites = [self.score_ui, self.past_ui];
+        let mut entites_iter = ui_entites.iter();
         if self.paused {
-            while let Some(Some(ui)) = [self.score_ui, self.past_ui].iter().next() {
+            while let Some(Some(ui)) = entites_iter.next() {
                 world.exec(|mut hidden: WriteStorage<HiddenPropagate>| {
                     if hidden.get(*ui).is_none() {
                         hidden
                             .insert(*ui, HiddenPropagate::new())
                             .expect("Failed to insert HiddenPropagate");
+                        log::debug!("{:?} insert HiddenPropagate", ui);
                     }
                 })
             }
         }
 
+        let mut entites_iter = ui_entites.iter();
         if !self.paused {
-            while let Some(Some(ui)) = [self.score_ui, self.past_ui].iter().next() {
+            while let Some(Some(ui)) = entites_iter.next() {
                 world.exec(|mut hidden: WriteStorage<HiddenPropagate>| {
                     if hidden.get(*ui).is_some() {
                         hidden
                             .remove(*ui)
                             .expect("Failed to remove HiddenPropagate");
+                        log::debug!("{:?} remove HiddenPropagate", ui);
                     }
                 });
             }
