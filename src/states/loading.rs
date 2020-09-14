@@ -53,6 +53,7 @@ impl<'a, 'b> State<GameData<'a, 'b>, ExtendedStateEvent> for LoadingState {
                     ReadStorage<AnimationSet<PlayerState, SpriteRender>>,
                     WriteStorage<AnimationControlSet<PlayerState, SpriteRender>>,
                 )| {
+                    // NOTE: 他のstateで流用する場合，不具合が発生する可能性あり．
                     for (entity, animation_set) in (&entities, &animation_sets).join() {
                         let control_set =
                             animation::get_animation_set(&mut control_sets, entity).unwrap();

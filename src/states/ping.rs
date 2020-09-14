@@ -21,7 +21,7 @@ use amethyst::{
         math::*,
         shrev::{EventChannel, ReaderId},
         transform::Transform,
-        ArcThreadPool, EventReader, Hidden,
+        ArcThreadPool, EventReader, Hidden, HiddenPropagate,
     },
     derive::EventReader,
     ecs::{
@@ -161,6 +161,36 @@ impl<'a, 'b, 'c, 'd> State<GameData<'c, 'd>, ExtendedStateEvent> for PingState<'
         Trans::None
     }
 
+    fn shadow_update(&mut self, data: StateData<'_, GameData<'_, '_>>) {
+        let world = data.world;
+
+        // doneTODO: ポーズ時にuiをHideする
+        if self.paused {
+            if let Some(score) = self.score_ui {
+                world.exec(|mut hidden: WriteStorage<HiddenPropagate>| {
+                    if hidden.get(score).is_none() {
+                        hidden
+                            .insert(score, HiddenPropagate::new())
+                            .expect("Failed to insert HiddenPropagate");
+                    }
+                })
+            }
+        }
+
+        if !self.paused {
+            if let Some(score) = self.score_ui {
+                world.exec(|mut hidden: WriteStorage<HiddenPropagate>| {
+                    if hidden.get(score).is_some() {
+                        hidden
+                            .remove(score)
+                            .expect("Failed to remove HiddenPropagate");
+                    }
+                    log::debug!("remove HiddenPropagate");
+                });
+            }
+        }
+    }
+
     fn handle_event(
         &mut self,
         _data: StateData<'_, GameData<'_, '_>>,
@@ -216,8 +246,6 @@ impl<'a, 'b, 'c, 'd> State<GameData<'c, 'd>, ExtendedStateEvent> for PingState<'
         let world = data.world;
         self.paused = true;
 
-        // TODO: ポーズ時にuiをHideする
-        if let Some(ui) = self.ui_root {}
     }
 
     fn on_resume(&mut self, data: StateData<'_, GameData<'_, '_>>) {

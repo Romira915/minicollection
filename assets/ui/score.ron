@@ -24,11 +24,13 @@ Container(
                         id: "score",
                         x: -50.,
                         y: -20.,
+                        z: -1.0,
                         width: 609,
                         height: 93.34,
                         tab_order: 1,
                         anchor: BottomRight,
                         mouse_reactive: false,
+                        hidden: true,
                     ),
                     text: (
                         text: "score",
