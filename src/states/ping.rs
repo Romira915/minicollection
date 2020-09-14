@@ -34,7 +34,7 @@ use amethyst::{
     },
     prelude::*,
     renderer::{Camera, ImageFormat, SpriteRender, SpriteSheet, SpriteSheetFormat, Texture},
-    ui::{UiCreator, UiEvent, UiFinder, UiPrefab},
+    ui::{UiCreator, UiEvent, UiFinder, UiPrefab, UiText},
     window::ScreenDimensions,
     winit::Event,
 };
@@ -156,6 +156,12 @@ impl<'a, 'b, 'c, 'd> State<GameData<'c, 'd>, ExtendedStateEvent> for PingState<'
                     self.score_ui = Some(entity);
                 }
             })
+        } else {
+            let mut ui_text = world.write_storage::<UiText>();
+
+            if let Some(score) = ui_text.get_mut(self.score_ui.unwrap()) {
+                score.text = format!("{}", score.text.parse::<i32>().unwrap_or(0) + 1);
+            }
         }
 
         Trans::None
@@ -185,7 +191,6 @@ impl<'a, 'b, 'c, 'd> State<GameData<'c, 'd>, ExtendedStateEvent> for PingState<'
                             .remove(score)
                             .expect("Failed to remove HiddenPropagate");
                     }
-                    log::debug!("remove HiddenPropagate");
                 });
             }
         }
@@ -245,7 +250,6 @@ impl<'a, 'b, 'c, 'd> State<GameData<'c, 'd>, ExtendedStateEvent> for PingState<'
     fn on_pause(&mut self, data: StateData<'_, GameData<'_, '_>>) {
         let world = data.world;
         self.paused = true;
-
     }
 
     fn on_resume(&mut self, data: StateData<'_, GameData<'_, '_>>) {

@@ -1,5 +1,6 @@
 # Unwanted files
 target
+debug
 
 # Backup files
 .DS_Store
@@ -7,3 +8,6 @@ thumbs.db
 *~
 *.rs.bk
 *.swp
+
+# release files
+release/

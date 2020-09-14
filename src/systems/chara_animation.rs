@@ -86,7 +86,7 @@ impl<'s> System<'s> for PingCharaAnimationSystem {
                                     && control_set.has_animation(state)
                             {
                                 control_set.abort(state);
-                                log::info!("Abort '{:?}'", state);
+                                log::debug!("Abort '{:?}'", state);
                             }
                         }
                         for &state in self.one_loop_state_list.iter() {
@@ -101,7 +101,7 @@ impl<'s> System<'s> for PingCharaAnimationSystem {
                                     loop_infinitely,
                                     EndControl::Loop(None),
                                 );
-                                log::info!("add_animation");
+                                log::debug!("add_animation");
                             }
                         }
                     }
