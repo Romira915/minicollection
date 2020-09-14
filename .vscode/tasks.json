@@ -14,7 +14,7 @@
 			"label": "Rust: cargo run - mini_collection",
 			"options": {
 				"env": {
-					// "AMETHYST_LOG_LEVEL_FILTER": "debug"
+					"AMETHYST_LOG_LEVEL_FILTER": "debug"
 				}
 			}
 		}

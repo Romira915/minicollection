@@ -10,4 +10,4 @@ thumbs.db
 *.swp
 
 # release files
-release/
+release

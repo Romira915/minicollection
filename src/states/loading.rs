@@ -68,6 +68,7 @@ impl<'a, 'b> State<GameData<'a, 'b>, ExtendedStateEvent> for LoadingState {
                 },
             );
 
+            log::debug!("[Trans::Pop] loading");
             return Trans::Pop;
         } else {
             let mut ui_transform = world.write_storage::<UiTransform>();
@@ -84,6 +85,7 @@ impl<'a, 'b> State<GameData<'a, 'b>, ExtendedStateEvent> for LoadingState {
                     loading_inside.width += 500. * time.delta_seconds();
                     loading_inside.width = loading_inside.width.min(LOADING_OUTSIDE_WIDTH);
                 }
+                log::debug!("finished / assets: {} / {}", num_finished, num_assets);
 
                 // loading_inside.width = percent * LOADING_OUTSIDE_WIDTH;
                 loading_inside.local_x = loading_inside.width * 0.5;
@@ -108,7 +110,9 @@ impl<'a, 'b> State<GameData<'a, 'b>, ExtendedStateEvent> for LoadingState {
                 .expect("Failed to remove loading state");
         }
 
+        self.progress_counter = None;
         self.ui_root = None;
+        self.loading_inside = None;
     }
 }
 

@@ -1,5 +1,5 @@
 // #[cfg(feature = "release")]
-#![windows_subsystem = "windows"]
+// #![windows_subsystem = "windows"]
 
 use amethyst::{
     animation::AnimationBundle,
@@ -27,22 +27,12 @@ use lib::{
 };
 
 fn main() -> amethyst::Result<()> {
-    // FIXME: コンパイル設定による分岐
-    let logger_config = if cfg!(feature = "release") {
-        LoggerConfig {
-            level_filter: LogLevelFilter::Info,
-            log_file: Some(PathBuf::from("log.txt")),
-            allow_env_override: false,
-            ..Default::default()
-        }
-    } else {
-        LoggerConfig {
-            level_filter: LogLevelFilter::Debug,
-            ..Default::default()
-        }
-    };
-
-    amethyst::start_logger(logger_config);
+    // TODO: リリース時とデバッグ時のコンパイル用に分岐させなければならない．#![windows_subsystem = "windows"]も同様にリリース時のみ
+    amethyst::start_logger(LoggerConfig {
+        level_filter: LogLevelFilter::Info,
+        allow_env_override: true,
+        ..Default::default()
+    });
 
     let app_root = application_root_dir()?;
 
