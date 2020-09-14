@@ -63,7 +63,7 @@ impl<'s> System<'s> for ExclamationmarkSystem {
         // Processing when the button is pressed
         // arg: Before the exclamation mark spanned
         // Return if someone pressed: bool
-        let mut process_when_pressed = |before: bool | {
+        let mut process_when_pressed = |before: bool| {
             let mut p1 = false;
             let mut p2 = false;
 

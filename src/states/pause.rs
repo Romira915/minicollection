@@ -37,7 +37,10 @@ impl<'a, 'b> State<GameData<'a, 'b>, ExtendedStateEvent> for PauseState {
                     which: _,
                     button: ControllerButton::Start,
                 }
-                | InputEvent::ButtonPressed(Button::Key(VirtualKeyCode::Escape)) => Trans::Pop,
+                | InputEvent::ButtonPressed(Button::Key(VirtualKeyCode::Escape)) => {
+                    log::info!("pop");
+                    Trans::Pop
+                }
                 _ => Trans::None,
             },
             _ => Trans::None,

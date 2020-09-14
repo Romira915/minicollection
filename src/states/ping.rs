@@ -34,7 +34,7 @@ use amethyst::{
     },
     prelude::*,
     renderer::{Camera, ImageFormat, SpriteRender, SpriteSheet, SpriteSheetFormat, Texture},
-    ui::UiEvent,
+    ui::{UiCreator, UiEvent, UiPrefab,UiFinder},
     window::ScreenDimensions,
     winit::Event,
 };
@@ -52,6 +52,8 @@ pub struct PingState<'a, 'b> {
     progress_counter: Option<ProgressCounter>,
     entities: Vec<Entity>,
     paused: bool,
+    ui_root: Option<Entity>,
+    score_ui: Option<Entity>
 }
 
 impl<'a, 'b, 'c, 'd> State<GameData<'c, 'd>, ExtendedStateEvent> for PingState<'a, 'b> {
@@ -105,6 +107,9 @@ impl<'a, 'b, 'c, 'd> State<GameData<'c, 'd>, ExtendedStateEvent> for PingState<'
         self.init_exclamationmark(world);
         self.init_backgrounds(world);
         self.init_stage(world);
+        self.ui_root = Some(world.exec(|mut creator: UiCreator<'_>| {
+            creator.create("ui/score.ron", self.progress_counter.as_mut().unwrap())
+        }));
     }
 
     fn on_stop(&mut self, data: StateData<'_, GameData<'_, '_>>) {
@@ -113,6 +118,12 @@ impl<'a, 'b, 'c, 'd> State<GameData<'c, 'd>, ExtendedStateEvent> for PingState<'
         world
             .delete_entities(&self.entities)
             .expect("Failed to remove PingState");
+
+        if let Some(root_entity) = self.ui_root {
+            world.delete_entity(root_entity).expect("Failed to remove ping ui_root");
+        }
+
+        self.score_ui = None;
     }
 
     fn update(
@@ -133,6 +144,16 @@ impl<'a, 'b, 'c, 'd> State<GameData<'c, 'd>, ExtendedStateEvent> for PingState<'
 
         if let Some(dispatcher) = self.dispatcher.as_mut() {
             dispatcher.dispatch(world);
+        }
+
+        // this cannot happen in 'on_start', as the entity might not be fully
+        // initialized/registered/created yet.
+        if self.score_ui.is_none() {
+            world.exec(|finder: UiFinder| {
+                if let Some(entity) = finder.find("score") {
+                    self.score_ui = Some(entity);
+                }
+            })
         }
 
         Trans::None
@@ -191,6 +212,9 @@ impl<'a, 'b, 'c, 'd> State<GameData<'c, 'd>, ExtendedStateEvent> for PingState<'
     fn on_pause(&mut self, data: StateData<'_, GameData<'_, '_>>) {
         let world = data.world;
         self.paused = true;
+
+        if let Some(ui) = self.ui_root {
+        }
     }
 
     fn on_resume(&mut self, data: StateData<'_, GameData<'_, '_>>) {

@@ -1,0 +1,49 @@
+#![enable(implicit_some)]
+Container(
+    transform: (
+        id: "background",
+        anchor: Middle,
+        stretch: XY( x_margin: 0., y_margin: 0., keep_aspect_ratio: false),
+        width: 20.,
+        height: 20.,
+    ),
+    background: SolidColor(0.0, 0.0, 0.0, 0.0),
+    children: [
+        Container(
+            transform: (
+                id: "ping_root",
+                x: 300.,
+                y: -260.,
+                anchor: Middle,
+                width: 609.,
+                height: 50.,
+            ),
+            children: [
+                Label(
+                    transform: (
+                        id: "score",
+                        x: -50.,
+                        y: -20.,
+                        width: 609,
+                        height: 93.34,
+                        tab_order: 1,
+                        anchor: BottomRight,
+                        mouse_reactive: false,
+                    ),
+                    text: (
+                        text: "score",
+                        font: File("font/rounded-mplus-1p-bold.ttf", ("TTF", ())),
+                        font_size: 70.,
+                        color: (1.0, 1.0, 1.0, 1.0),
+                        align: BottomLeft,
+                        editable: (
+                            max_length: 100,
+                            selected_text_color: (0.09, 0.02, 0.25, 1.0),
+                            selected_background_color: (1.0, 0.5, 0.8, 1.0),
+                        ),
+                    )
+                )
+            ],
+        )
+    ],
+)
