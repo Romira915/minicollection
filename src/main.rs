@@ -12,6 +12,7 @@ use amethyst::{
     },
     ui::{RenderUi, UiBundle},
     utils::application_root_dir,
+    LogLevelFilter, LoggerConfig,
 };
 
 extern crate minicollection as lib;
@@ -22,7 +23,10 @@ use lib::{
 };
 
 fn main() -> amethyst::Result<()> {
-    amethyst::start_logger(Default::default());
+    amethyst::start_logger(LoggerConfig {
+        level_filter: LogLevelFilter::Debug,
+        ..Default::default()
+    });
 
     let app_root = application_root_dir()?;
 

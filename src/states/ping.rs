@@ -34,7 +34,7 @@ use amethyst::{
     },
     prelude::*,
     renderer::{Camera, ImageFormat, SpriteRender, SpriteSheet, SpriteSheetFormat, Texture},
-    ui::{UiCreator, UiEvent, UiPrefab,UiFinder},
+    ui::{UiCreator, UiEvent, UiFinder, UiPrefab},
     window::ScreenDimensions,
     winit::Event,
 };
@@ -53,7 +53,7 @@ pub struct PingState<'a, 'b> {
     entities: Vec<Entity>,
     paused: bool,
     ui_root: Option<Entity>,
-    score_ui: Option<Entity>
+    score_ui: Option<Entity>,
 }
 
 impl<'a, 'b, 'c, 'd> State<GameData<'c, 'd>, ExtendedStateEvent> for PingState<'a, 'b> {
@@ -120,7 +120,9 @@ impl<'a, 'b, 'c, 'd> State<GameData<'c, 'd>, ExtendedStateEvent> for PingState<'
             .expect("Failed to remove PingState");
 
         if let Some(root_entity) = self.ui_root {
-            world.delete_entity(root_entity).expect("Failed to remove ping ui_root");
+            world
+                .delete_entity(root_entity)
+                .expect("Failed to remove ping ui_root");
         }
 
         self.score_ui = None;
@@ -178,6 +180,7 @@ impl<'a, 'b, 'c, 'd> State<GameData<'c, 'd>, ExtendedStateEvent> for PingState<'
                     button: ControllerButton::Start,
                 }
                 | InputEvent::ButtonPressed(Button::Key(VirtualKeyCode::Escape)) => {
+                    log::debug!("push pause");
                     Trans::Push(Box::new(PauseState))
                 }
                 _ => Trans::None,
@@ -213,8 +216,8 @@ impl<'a, 'b, 'c, 'd> State<GameData<'c, 'd>, ExtendedStateEvent> for PingState<'
         let world = data.world;
         self.paused = true;
 
-        if let Some(ui) = self.ui_root {
-        }
+        // TODO: ポーズ時にuiをHideする
+        if let Some(ui) = self.ui_root {}
     }
 
     fn on_resume(&mut self, data: StateData<'_, GameData<'_, '_>>) {
