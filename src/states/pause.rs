@@ -26,6 +26,14 @@ impl<'a, 'b> State<GameData<'a, 'b>, ExtendedStateEvent> for PauseState {
         player_animation_control(world, "pause");
     }
 
+    fn update(
+        &mut self,
+        data: StateData<'_, GameData<'_, '_>>,
+    ) -> Trans<GameData<'a, 'b>, ExtendedStateEvent> {
+        data.data.update(data.world);
+        Trans::None
+    }
+
     fn handle_event(
         &mut self,
         _data: StateData<'_, GameData<'_, '_>>,
