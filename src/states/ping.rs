@@ -153,30 +153,18 @@ impl<'a, 'b, 'c, 'd> State<GameData<'c, 'd>, ExtendedStateEvent> for PingState<'
         // this cannot happen in 'on_start', as the entity might not be fully
         // initialized/registered/created yet.
         if self.score_ui.is_none() {
-            world.exec(|finder: UiFinder| {
+            world.exec(|finder: UiFinder<'_>| {
                 if let Some(entity) = finder.find("score") {
                     self.score_ui = Some(entity);
                 }
             })
-        } else {
-            let mut ui_text = world.write_storage::<UiText>();
-
-            if let Some(score) = ui_text.get_mut(self.score_ui.unwrap()) {
-                score.text = format!("{}", score.text.parse::<i32>().unwrap_or(0) + 1);
-            }
         }
         if self.past_ui.is_none() {
-            world.exec(|finder: UiFinder| {
+            world.exec(|finder: UiFinder<'_>| {
                 if let Some(entity) = finder.find("past_frame") {
                     self.past_ui = Some(entity);
                 }
             })
-        } else {
-            let mut ui_text = world.write_storage::<UiText>();
-
-            if let Some(score) = ui_text.get_mut(self.past_ui.unwrap()) {
-                score.text = format!("{}", score.text.parse::<i32>().unwrap_or(0) + 1);
-            }
         }
 
         Trans::None

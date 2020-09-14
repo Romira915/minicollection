@@ -1,7 +1,7 @@
 #![enable(implicit_some)]
 Container(
     transform: (
-        id: "background",
+        id: "ping_root",
         anchor: Middle,
         stretch: XY( x_margin: 0., y_margin: 0., keep_aspect_ratio: false),
         width: 20.,
@@ -9,69 +9,46 @@ Container(
     ),
     background: SolidColor(0.0, 0.0, 0.0, 0.0),
     children: [
-        Container(
+        Label(
             transform: (
-                id: "ping_root",
-                x: 300.,
-                y: -260.,
-                anchor: Middle,
-                width: 609.,
-                height: 50.,
+                id: "score",
+                y: -100.,
+                width: 500.,
+                height: 100.,
+                anchor: TopMiddle,
+                mouse_reactive: false,
+                hidden: true,
             ),
-            children: [
-                Label(
-                    transform: (
-                        id: "score",
-                        x: -50.,
-                        y: -20.,
-                        z: -1.0,
-                        width: 609,
-                        height: 93.34,
-                        tab_order: 1,
-                        anchor: BottomRight,
-                        mouse_reactive: false,
-                        hidden: true,
-                    ),
-                    text: (
-                        text: "score",
-                        font: File("font/rounded-mplus-1p-bold.ttf", ("TTF", ())),
-                        font_size: 70.,
-                        color: (1.0, 1.0, 1.0, 1.0),
-                        align: BottomLeft,
-                        editable: (
-                            max_length: 100,
-                            selected_text_color: (0.09, 0.02, 0.25, 1.0),
-                            selected_background_color: (1.0, 0.5, 0.8, 1.0),
-                        ),
-                    ),
+            text: (
+                text: "p1    p2",
+                font: File("font/rounded-mplus-1p-bold.ttf", ("TTF", ())),
+                font_size: 70.,
+                color: (0.0, 0.0, 0.0, 1.0),
+                align: BottomMiddle,
+                editable: (
+                    max_length: 100,
+                    selected_text_color: (0.09, 0.02, 0.25, 1.0),
+                    selected_background_color: (1.0, 0.5, 0.8, 1.0),
                 ),
-                Label(
-                    transform: (
-                        id: "past_frame",
-                        x: -50.,
-                        y: -20.,
-                        z: -1.0,
-                        width: 609,
-                        height: 93.34,
-                        tab_order: 1,
-                        anchor: Top,
-                        mouse_reactive: false,
-                        hidden: true,
-                    ),
-                    text: (
-                        text: "0",
-                        font: File("font/rounded-mplus-1p-bold.ttf", ("TTF", ())),
-                        font_size: 70.,
-                        color: (1.0, 1.0, 1.0, 1.0),
-                        align: Top,
-                        editable: (
-                            max_length: 100,
-                            selected_text_color: (0.09, 0.02, 0.25, 1.0),
-                            selected_background_color: (1.0, 0.5, 0.8, 1.0),
-                        ),
-                    ),
-                ),
-            ],
-        )
+            ),
+        ),
+        Label(
+            transform: (
+                id: "past_frame",
+                y: 40.,
+                width: 200.,
+                height: 100.,
+                anchor: BottomMiddle,
+                mouse_reactive: false,
+                hidden: true,
+            ),
+            text: (
+                text: "0",
+                font: File("font/rounded-mplus-1p-bold.ttf", ("TTF", ())),
+                font_size: 70.,
+                color: (1.0, 1.0, 1.0, 1.0),
+                align: TopMiddle,
+            ),
+        ),
     ],
 )

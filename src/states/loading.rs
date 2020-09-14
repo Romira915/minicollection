@@ -85,7 +85,6 @@ impl<'a, 'b> State<GameData<'a, 'b>, ExtendedStateEvent> for LoadingState {
                     loading_inside.width += 500. * time.delta_seconds();
                     loading_inside.width = loading_inside.width.min(LOADING_OUTSIDE_WIDTH);
                 }
-                log::debug!("finished / assets: {} / {}", num_finished, num_assets);
 
                 // loading_inside.width = percent * LOADING_OUTSIDE_WIDTH;
                 loading_inside.local_x = loading_inside.width * 0.5;

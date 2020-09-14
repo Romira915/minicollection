@@ -4,7 +4,10 @@
 use amethyst::{
     animation::AnimationBundle,
     assets::PrefabLoaderSystemDesc,
-    core::{frame_limiter::FrameRateLimitStrategy, transform::TransformBundle},
+    core::{
+        frame_limiter::FrameRateLimitStrategy, transform::TransformBundle, HideHierarchySystem,
+        HideHierarchySystemDesc,
+    },
     input::{InputBundle, StringBindings},
     prelude::*,
     renderer::{
@@ -58,6 +61,11 @@ fn main() -> amethyst::Result<()> {
         .with_bundle(TransformBundle::new())?
         .with_bundle(InputBundle::<StringBindings>::new().with_bindings_from_file(binding_path)?)?
         .with_bundle(UiBundle::<StringBindings>::new())?
+        .with_system_desc(
+            HideHierarchySystemDesc::default(),
+            "hide_hierarchy_system_desc",
+            &[],
+        )
         .with_system_desc(
             PrefabLoaderSystemDesc::<PlayerPrefabData>::default(),
             "player_loader",
