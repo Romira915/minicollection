@@ -28,16 +28,16 @@ use lib::{
 
 fn main() -> amethyst::Result<()> {
     // FIXME: コンパイル設定による分岐
-    let logger_config = if cfg!(feature = "release") {
+    let logger_config = if cfg!(debug_assertions) {
         LoggerConfig {
-            level_filter: LogLevelFilter::Info,
-            log_file: Some(PathBuf::from("log.txt")),
-            allow_env_override: false,
+            level_filter: LogLevelFilter::Debug,
             ..Default::default()
         }
     } else {
         LoggerConfig {
-            level_filter: LogLevelFilter::Debug,
+            level_filter: LogLevelFilter::Info,
+            log_file: Some(PathBuf::from("log.txt")),
+            allow_env_override: false,
             ..Default::default()
         }
     };
