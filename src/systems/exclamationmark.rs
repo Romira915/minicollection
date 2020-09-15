@@ -12,6 +12,7 @@ use amethyst::{
     input::{InputHandler, StringBindings},
     renderer::SpriteRender,
     shrev::*,
+    ui::{UiFinder, UiText, UiTransform},
 };
 use rand::rngs::ThreadRng;
 
@@ -31,13 +32,25 @@ impl<'s> System<'s> for ExclamationmarkSystem {
         Read<'s, Time>,
         Write<'s, EventChannel<PingEvent>>,
         WriteStorage<'s, PingPlayer>,
+        WriteStorage<'s, UiText>,
+        UiFinder<'s>,
     );
 
     // doneTODO: 早押し判定システム実装
     // TODO: 経過フレーム・勝敗UI実装
     fn run(
         &mut self,
-        (entities, exclamationmarks, mut hiddens, input, time, mut channel, mut players): Self::SystemData,
+        (
+            entities,
+            exclamationmarks,
+            mut hiddens,
+            input,
+            time,
+            mut channel,
+            mut players,
+            mut ui_text,
+            ui_finder,
+        ): Self::SystemData,
     ) {
         self.count_frame += 1;
         // if self.count_frame == crate::FRAME_RATE * self.spanw_frame {
@@ -113,6 +126,14 @@ impl<'s> System<'s> for ExclamationmarkSystem {
         // After appearing exclamationmark
         if self.count_frame >= self.spanw_frame && !self.pressed {
             self.past_frame += 1;
+
+            // ui update
+            let past_ui = ui_finder
+                .find("past_frame")
+                .expect("Found to ui past_frame");
+            let past_text = ui_text.get_mut(past_ui).expect("Failed to ui_text.get_mut");
+
+            past_text.text = self.past_frame.to_string();
 
             self.pressed = process_when_pressed(false);
         }
