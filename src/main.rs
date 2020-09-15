@@ -29,12 +29,22 @@ use lib::{
 };
 
 fn main() -> amethyst::Result<()> {
-    // TODO: リリース時とデバッグ時のコンパイル用に分岐させなければならない．#![windows_subsystem = "windows"]も同様にリリース時のみ
-    amethyst::start_logger(LoggerConfig {
-        level_filter: LogLevelFilter::Info,
-        allow_env_override: true,
-        ..Default::default()
-    });
+    // NOTE: コンパイル設定による分岐
+    let logger_config = if cfg!(debug_assertions) {
+        LoggerConfig {
+            level_filter: LogLevelFilter::Debug,
+            ..Default::default()
+        }
+    } else {
+        LoggerConfig {
+            level_filter: LogLevelFilter::Info,
+            log_file: Some(PathBuf::from("log.txt")),
+            allow_env_override: false,
+            ..Default::default()
+        }
+    };
+
+    amethyst::start_logger(logger_config);
 
     let app_root = application_root_dir()?;
 
