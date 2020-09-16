@@ -15,7 +15,7 @@ use amethyst::{
         types::DefaultBackend,
         RenderingBundle,
     },
-    ui::{RenderUi, UiBundle},
+    ui::{RenderUi, UiBundle,UiButtonSystemDesc},
     utils::application_root_dir,
     LogLevelFilter, LoggerConfig, StdoutLog,
 };
@@ -75,6 +75,7 @@ fn main() -> amethyst::Result<()> {
             "hide_hierarchy_system_desc",
             &[],
         )
+        .with_system_desc(UiButtonSystemDesc::default(), "ui_button_system_desc", &[])
         .with_system_desc(
             PrefabLoaderSystemDesc::<PlayerPrefabData>::default(),
             "player_loader",
