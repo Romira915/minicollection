@@ -124,6 +124,7 @@ impl<'a, 'b, 'c, 'd> State<GameData<'c, 'd>, ExtendedStateEvent> for PingState<'
             world
                 .delete_entity(root_entity)
                 .expect("Failed to remove ping ui_root");
+            self.ui_root = None;
         }
 
         self.score_ui = None;

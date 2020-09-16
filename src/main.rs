@@ -25,7 +25,7 @@ extern crate minicollection as lib;
 use lib::{
     bundle::Bundle,
     components::player::*,
-    states::{ping::PingState, *},
+    states::{ping::PingState, title::TitleState, *},
 };
 
 fn main() -> amethyst::Result<()> {
@@ -92,7 +92,7 @@ fn main() -> amethyst::Result<()> {
     //     .build(game_data)?;
     let mut game = CoreApplication::<_, ExtendedStateEvent, ExtendedStateEventReader>::build(
         assets_dir,
-        PingState::default(),
+        TitleState::default(),
     )?
     .with_frame_limit(FrameRateLimitStrategy::Yield, lib::FRAME_RATE as u32)
     .build(game_data)?;
