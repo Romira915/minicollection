@@ -93,7 +93,7 @@ fn main() -> amethyst::Result<()> {
     //     .build(game_data)?;
     let mut game = CoreApplication::<_, ExtendedStateEvent, ExtendedStateEventReader>::build(
         assets_dir,
-        TitleState::default(),
+        PingState::default(),
     )?
     .with_frame_limit(FrameRateLimitStrategy::Yield, lib::FRAME_RATE as u32)
     .build(game_data)?;

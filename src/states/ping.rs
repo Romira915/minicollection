@@ -51,6 +51,7 @@ pub struct PingState<'a, 'b> {
     dispatcher: Option<Dispatcher<'a, 'b>>,
     progress_counter: Option<ProgressCounter>,
     entities: Vec<Entity>,
+    score: [u32; 2], // index 0 is p1, index 1 is p2 or cpu.
     paused: bool,
     ui_root: Option<Entity>,
     score_ui: Option<Entity>,
@@ -155,17 +156,18 @@ impl<'a, 'b, 'c, 'd> State<GameData<'c, 'd>, ExtendedStateEvent> for PingState<'
         // initialized/registered/created yet.
         if self.score_ui.is_none() {
             world.exec(|finder: UiFinder<'_>| {
-                if let Some(entity) = finder.find("score") {
-                    self.score_ui = Some(entity);
-                }
+                self.score_ui = finder.find("score");
             })
         }
         if self.past_ui.is_none() {
             world.exec(|finder: UiFinder<'_>| {
-                if let Some(entity) = finder.find("past_frame") {
-                    self.past_ui = Some(entity);
-                }
+                self.past_ui = finder.find("past_frame");
             })
+        }
+
+        let mut ui_text = world.write_storage::<UiText>();
+        if let Some(score) = self.score_ui.and_then(|entity| ui_text.get_mut(entity)) {
+            score.text = format!("{}     {}", self.score[0], self.score[1]);
         }
 
         Trans::None
@@ -232,10 +234,14 @@ impl<'a, 'b, 'c, 'd> State<GameData<'c, 'd>, ExtendedStateEvent> for PingState<'
             ExtendedStateEvent::Ping(e) => match e {
                 PingEvent::P1Win => {
                     log::info!("P1 Win");
+                    self.score[0] += 1;
+
                     Trans::None
                 }
                 PingEvent::P2Win => {
                     log::info!("P2 Win");
+                    self.score[1] += 1;
+
                     Trans::None
                 }
                 PingEvent::Draw => {
