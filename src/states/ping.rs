@@ -51,6 +51,7 @@ pub struct PingState<'a, 'b> {
     dispatcher: Option<Dispatcher<'a, 'b>>,
     progress_counter: Option<ProgressCounter>,
     entities: Vec<Entity>,
+    score: [u32; 2], // index 0 is p1, index 1 is p2 or cpu.
     paused: bool,
     ui_root: Option<Entity>,
     score_ui: Option<Entity>,
@@ -164,6 +165,11 @@ impl<'a, 'b, 'c, 'd> State<GameData<'c, 'd>, ExtendedStateEvent> for PingState<'
             })
         }
 
+        let mut ui_text = world.write_storage::<UiText>();
+        if let Some(score) = self.score_ui.and_then(|entity| ui_text.get_mut(entity)) {
+            score.text = format!("{}     {}", self.score[0], self.score[1]);
+        }
+
         Trans::None
     }
 
@@ -228,10 +234,14 @@ impl<'a, 'b, 'c, 'd> State<GameData<'c, 'd>, ExtendedStateEvent> for PingState<'
             ExtendedStateEvent::Ping(e) => match e {
                 PingEvent::P1Win => {
                     log::info!("P1 Win");
+                    self.score[0] += 1;
+
                     Trans::None
                 }
                 PingEvent::P2Win => {
                     log::info!("P2 Win");
+                    self.score[1] += 1;
+
                     Trans::None
                 }
                 PingEvent::Draw => {
