@@ -4,3 +4,4 @@ pub mod exclamationmark;
 pub mod gravity_collision;
 pub mod player;
 pub mod stages;
+pub mod button_control;

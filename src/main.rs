@@ -15,7 +15,7 @@ use amethyst::{
         types::DefaultBackend,
         RenderingBundle,
     },
-    ui::{RenderUi, UiBundle,UiButtonSystemDesc},
+    ui::{RenderUi, UiBundle, UiButtonSystemDesc},
     utils::application_root_dir,
     LogLevelFilter, LoggerConfig, StdoutLog,
 };

@@ -155,16 +155,12 @@ impl<'a, 'b, 'c, 'd> State<GameData<'c, 'd>, ExtendedStateEvent> for PingState<'
         // initialized/registered/created yet.
         if self.score_ui.is_none() {
             world.exec(|finder: UiFinder<'_>| {
-                if let Some(entity) = finder.find("score") {
-                    self.score_ui = Some(entity);
-                }
+                self.score_ui = finder.find("score");
             })
         }
         if self.past_ui.is_none() {
             world.exec(|finder: UiFinder<'_>| {
-                if let Some(entity) = finder.find("past_frame") {
-                    self.past_ui = Some(entity);
-                }
+                self.past_ui = finder.find("past_frame");
             })
         }
 

@@ -12,6 +12,7 @@ Container(
         Button(
             transform: (
                 id: "start",
+                y: 80.0,
                 width: 750.,
                 height: 145.,
                 anchor: Middle,
@@ -20,6 +21,26 @@ Container(
             ),
             button: (
                 text: "START",
+                font_size: 80.,
+                font: File("font/rounded-mplus-1p-bold.ttf", ("TTF", ())),
+                normal_text_color: (1.0, 1.0, 1.0, 1.0),
+                normal_image: SolidColor(0., 0., 0., 1.),
+                hover_image: SolidColor(0.1, 0.1, 0.1, 1.),
+                press_image: SolidColor(0.15, 0.15, 0.15, 1.),
+            )
+        ),
+        Button(
+            transform: (
+                id: "exit",
+                y: -80.0,
+                width: 750.,
+                height: 145.,
+                anchor: Middle,
+                mouse_reactive: true,
+                selectable: 1
+            ),
+            button: (
+                text: "EXIT",
                 font_size: 80.,
                 font: File("font/rounded-mplus-1p-bold.ttf", ("TTF", ())),
                 normal_text_color: (1.0, 1.0, 1.0, 1.0),
