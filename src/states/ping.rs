@@ -176,7 +176,7 @@ impl<'a, 'b, 'c, 'd> State<GameData<'c, 'd>, ExtendedStateEvent> for PingState<'
             self.count_after_pressed += 1;
 
             if self.count_after_pressed > crate::FRAME_RATE * 2 {
-                return Trans::Switch(Box::new(PingState::new(self.score)));
+                return Trans::Switch(Box::new(Self::new(self.score)));
             }
         }
 
@@ -282,6 +282,16 @@ impl<'a, 'b, 'c, 'd> State<GameData<'c, 'd>, ExtendedStateEvent> for PingState<'
     fn on_resume(&mut self, data: StateData<'_, GameData<'_, '_>>) {
         let world = data.world;
         self.paused = false;
+    }
+}
+
+impl<'a, 'b> Clone for PingState<'a, 'b> {
+    fn clone(&self) -> Self {
+        Self {
+            dispatcher: None,
+            progress_counter: None,
+            ..self.clone()
+        }
     }
 }
 
