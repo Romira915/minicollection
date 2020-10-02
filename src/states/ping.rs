@@ -53,6 +53,8 @@ pub struct PingState<'a, 'b> {
     entities: Vec<Entity>,
     score: [u32; 2], // index 0 is p1, index 1 is p2 or cpu.
     paused: bool,
+    is_pressed: bool, // ゲームの流れが終了したかどうか
+    count_after_pressed: usize,
     ui_root: Option<Entity>,
     score_ui: Option<Entity>,
     past_ui: Option<Entity>,
@@ -170,6 +172,14 @@ impl<'a, 'b, 'c, 'd> State<GameData<'c, 'd>, ExtendedStateEvent> for PingState<'
             score.text = format!("{}     {}", self.score[0], self.score[1]);
         }
 
+        if self.is_pressed {
+            self.count_after_pressed += 1;
+
+            if self.count_after_pressed > crate::FRAME_RATE * 2 {
+                return Trans::Switch(Box::new(PingState::new(self.score)));
+            }
+        }
+
         Trans::None
     }
 
@@ -235,12 +245,14 @@ impl<'a, 'b, 'c, 'd> State<GameData<'c, 'd>, ExtendedStateEvent> for PingState<'
                 PingEvent::P1Win => {
                     log::info!("P1 Win");
                     self.score[0] += 1;
+                    self.is_pressed = true;
 
                     Trans::None
                 }
                 PingEvent::P2Win => {
                     log::info!("P2 Win");
                     self.score[1] += 1;
+                    self.is_pressed = true;
 
                     Trans::None
                 }
@@ -275,6 +287,13 @@ impl<'a, 'b, 'c, 'd> State<GameData<'c, 'd>, ExtendedStateEvent> for PingState<'
 
 use std::marker::{Send, Sync};
 impl<'a, 'b> PingState<'a, 'b> {
+    pub fn new(score: [u32; 2]) -> Self {
+        PingState {
+            score,
+            ..Default::default()
+        }
+    }
+
     fn init_chara(&mut self, world: &mut World, p2_mode: PlayerNumber) {
         let (screen_width, screen_height) = super::get_screensize(world);
         let p1_path = "texture/HeavyBandit";
