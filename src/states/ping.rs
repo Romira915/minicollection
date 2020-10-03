@@ -53,7 +53,8 @@ pub struct PingState<'a, 'b> {
     entities: Vec<Entity>,
     score: [u32; 2], // index 0 is p1, index 1 is p2 or cpu.
     paused: bool,
-    is_pressed: bool, // ゲームの流れが終了したかどうか
+    is_pressed: bool,  // ゲームの流れが終了したかどうか
+    is_game_end: bool, // 全てのゲームが終了したかどうか
     count_after_pressed: usize,
     ui_root: Option<Entity>,
     score_ui: Option<Entity>,
@@ -106,32 +107,49 @@ impl<'a, 'b, 'c, 'd> State<GameData<'c, 'd>, ExtendedStateEvent> for PingState<'
         dispatcher.setup(world);
         self.dispatcher = Some(dispatcher);
 
-        self.init_chara(world, PlayerNumber::P2);
-        init_camera(world);
-        self.init_exclamationmark(world);
-        self.init_backgrounds(world);
-        self.init_stage(world);
-        self.ui_root = Some(world.exec(|mut creator: UiCreator<'_>| {
-            creator.create("ui/score.ron", self.progress_counter.as_mut().unwrap())
-        }));
+        if self.entities.is_empty() {
+            self.init_chara(world, PlayerNumber::P2);
+            init_camera(world);
+            self.init_exclamationmark(world);
+            self.init_backgrounds(world);
+            self.init_stage(world);
+            self.ui_root = Some(world.exec(|mut creator: UiCreator<'_>| {
+                creator.create("ui/score.ron", self.progress_counter.as_mut().unwrap())
+            }));
+        }
     }
 
     fn on_stop(&mut self, data: StateData<'_, GameData<'_, '_>>) {
         let world = data.world;
 
-        world
-            .delete_entities(&self.entities)
-            .expect("Failed to remove PingState");
-
-        if let Some(root_entity) = self.ui_root {
+        if self.is_game_end {
             world
-                .delete_entity(root_entity)
-                .expect("Failed to remove ping ui_root");
-            self.ui_root = None;
-        }
+                .delete_entities(&self.entities)
+                .expect("Failed to remove PingState");
+            self.entities.clear();
 
-        self.score_ui = None;
-        self.past_ui = None;
+            if let Some(root_entity) = self.ui_root {
+                world
+                    .delete_entity(root_entity)
+                    .expect("Failed to remove ping ui_root");
+                self.ui_root = None;
+            }
+
+            self.score_ui = None;
+            self.past_ui = None;
+        } else {
+            world.exec(
+                |(entitys, mut hiddens, exclamationmarks): (
+                    Entities,
+                    WriteStorage<Hidden>,
+                    ReadStorage<Exclamationmark>,
+                )| {
+                    for (entity, exclamationmark) in (&entitys, &exclamationmarks).join() {
+                        hiddens.insert(entity, Hidden::default()).expect("Failed to insert hiddens");
+                    }
+                },
+            )
+        }
     }
 
     fn update(
@@ -176,6 +194,7 @@ impl<'a, 'b, 'c, 'd> State<GameData<'c, 'd>, ExtendedStateEvent> for PingState<'
             self.count_after_pressed += 1;
 
             if self.count_after_pressed > crate::FRAME_RATE * 2 {
+                // TODO Switch後の演出実装
                 return Trans::Switch(Box::new(PingState::new_from(&self))); // NOTE cloneの代用．self.cloneではコンパイルが通らない．要調査．
             }
         }
@@ -318,6 +337,7 @@ impl<'a, 'b> PingState<'a, 'b> {
             ui_root: s.ui_root.clone(),
             score_ui: s.score_ui.clone(),
             past_ui: s.past_ui.clone(),
+            is_game_end: s.is_game_end.clone(),
             ..Default::default()
         }
     }
