@@ -176,7 +176,7 @@ impl<'a, 'b, 'c, 'd> State<GameData<'c, 'd>, ExtendedStateEvent> for PingState<'
             self.count_after_pressed += 1;
 
             if self.count_after_pressed > crate::FRAME_RATE * 2 {
-                return Trans::Switch(Box::new(Self::new(self.score)));
+                return Trans::Switch(Box::new(PingState::new_from(&self))); // NOTE cloneの代用．self.cloneではコンパイルが通らない．要調査．
             }
         }
 
@@ -258,14 +258,18 @@ impl<'a, 'b, 'c, 'd> State<GameData<'c, 'd>, ExtendedStateEvent> for PingState<'
                 }
                 PingEvent::Draw => {
                     log::info!("Draw");
+
+                    self.is_pressed = true;
                     Trans::None
                 }
                 PingEvent::P1Flying => {
                     log::info!("P1 Flying");
+                    self.is_pressed = true;
                     Trans::None
                 }
                 PingEvent::P2Flying => {
                     log::info!("P2 Flying");
+                    self.is_pressed = true;
                     Trans::None
                 }
                 _ => Trans::None,
@@ -287,19 +291,33 @@ impl<'a, 'b, 'c, 'd> State<GameData<'c, 'd>, ExtendedStateEvent> for PingState<'
 
 impl<'a, 'b> Clone for PingState<'a, 'b> {
     fn clone(&self) -> Self {
-        Self {
-            dispatcher: None,
-            progress_counter: None,
-            ..self.clone()
+        PingState {
+            player_initmotion_timer: None,
+            player1_sprite_sheet_handle: self.player1_sprite_sheet_handle.clone(),
+            cpu_sprite_sheet_handle: self.cpu_sprite_sheet_handle.clone(),
+            entities: self.entities.clone(),
+            score: self.score.clone(), // index 0 is p1, index 1 is p2 or cpu.
+            paused: self.paused.clone(),
+            is_pressed: self.is_pressed.clone(), // ゲームの流れが終了したかどうか
+            count_after_pressed: self.count_after_pressed.clone(),
+            ui_root: self.ui_root.clone(),
+            score_ui: self.score_ui.clone(),
+            past_ui: self.past_ui.clone(),
+            ..Default::default()
         }
     }
 }
 
 use std::marker::{Send, Sync};
 impl<'a, 'b> PingState<'a, 'b> {
-    pub fn new(score: [u32; 2]) -> Self {
+    pub fn new_from(s: &PingState) -> Self {
         PingState {
-            score,
+            // Takeover data
+            score: s.score,
+            entities: s.entities.clone(),
+            ui_root: s.ui_root.clone(),
+            score_ui: s.score_ui.clone(),
+            past_ui: s.past_ui.clone(),
             ..Default::default()
         }
     }
