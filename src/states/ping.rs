@@ -145,7 +145,9 @@ impl<'a, 'b, 'c, 'd> State<GameData<'c, 'd>, ExtendedStateEvent> for PingState<'
                     ReadStorage<Exclamationmark>,
                 )| {
                     for (entity, exclamationmark) in (&entitys, &exclamationmarks).join() {
-                        hiddens.insert(entity, Hidden::default()).expect("Failed to insert hiddens");
+                        hiddens
+                            .insert(entity, Hidden::default())
+                            .expect("Failed to insert hiddens");
                     }
                 },
             )
@@ -263,31 +265,30 @@ impl<'a, 'b, 'c, 'd> State<GameData<'c, 'd>, ExtendedStateEvent> for PingState<'
             ExtendedStateEvent::Ping(e) => match e {
                 PingEvent::P1Win => {
                     log::info!("P1 Win");
-                    self.score[0] += 1;
+                    self.score[0] = self.score[0].saturating_add(1);
                     self.is_pressed = true;
-
                     Trans::None
                 }
                 PingEvent::P2Win => {
                     log::info!("P2 Win");
-                    self.score[1] += 1;
+                    self.score[1] = self.score[1].saturating_add(1);
                     self.is_pressed = true;
-
                     Trans::None
                 }
                 PingEvent::Draw => {
                     log::info!("Draw");
-
                     self.is_pressed = true;
                     Trans::None
                 }
                 PingEvent::P1Flying => {
                     log::info!("P1 Flying");
+                    self.score[0] = self.score[0].saturating_sub(1);
                     self.is_pressed = true;
                     Trans::None
                 }
                 PingEvent::P2Flying => {
                     log::info!("P2 Flying");
+                    self.score[1] = self.score[1].saturating_sub(1);
                     self.is_pressed = true;
                     Trans::None
                 }
