@@ -15,6 +15,7 @@ use amethyst::{
 pub struct PingCharaAnimationSystem {
     one_loop_state_list: Vec<PlayerState>,
     loop_infinitely_state_list: Vec<PlayerState>,
+    preframe_is_down: bool,
 }
 
 impl<'s> System<'s> for PingCharaAnimationSystem {
@@ -126,6 +127,28 @@ impl<'s> System<'s> for PingCharaAnimationSystem {
             // if input.action_is_down("back").unwrap() {
             //     player.push_state(PlayerState::Rise);
             // }
+
+            if player.player_num == PlayerNumber::P1
+                && input.action_is_down("enter_p2").unwrap_or(false)
+                && !self.preframe_is_down
+            {
+                player.push_state(PlayerState::Falling);
+                self.preframe_is_down = true;
+            } else if (player.player_num == PlayerNumber::P2
+                || player.player_num == PlayerNumber::CPU)
+                && input.action_is_down("enter").unwrap_or(false)
+                && !self.preframe_is_down
+            {
+                player.push_state(PlayerState::Falling);
+                self.preframe_is_down = true;
+            }
+
+            if (!input.action_is_down("enter").unwrap_or(false)
+                && !input.action_is_down("enter_p2").unwrap_or(false))
+                && self.preframe_is_down
+            {
+                self.preframe_is_down = false;
+            }
         }
     }
 }
@@ -140,6 +163,7 @@ impl Default for PingCharaAnimationSystem {
                 PlayerState::Run,
                 PlayerState::Wait,
             ],
+            preframe_is_down: false,
         }
     }
 }

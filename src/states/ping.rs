@@ -299,8 +299,8 @@ impl<'a, 'b, 'c, 'd> State<GameData<'c, 'd>, ExtendedStateEvent> for PingState<'
                 }
                 | InputEvent::ButtonPressed(Button::Key(VirtualKeyCode::Escape)) => {
                     log::debug!("push pause");
-                    Trans::Push(Box::new(WinState::default()))
-                    // Trans::Push(Box::new(PauseState::default()))
+                    // Trans::Push(Box::new(WinState::default()))
+                    Trans::Push(Box::new(PauseState::default()))
                 }
                 _ => Trans::None,
             },
@@ -490,6 +490,14 @@ impl<'a, 'b> PingState<'a, 'b> {
         // world.add_resource(ExclamationmarkResources::new(sprite_render, transform));
     }
     fn init_backgrounds(&mut self, world: &mut World) {
+        let image_paths = [
+            ("day-beach-sky", "day-backgrounds"),
+            ("sunset-beach-sky", "sunset-backgrounds"),
+            ("night-beach-sky", "night-backgrounds"),
+        ];
+
+        for (sky, background) in image_paths.iter() {}
+
         use amethyst::renderer::sprite::{
             SpriteList,
             Sprites::{self, *},
