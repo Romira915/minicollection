@@ -6,7 +6,9 @@ use crate::{
         stages::*,
         GeneralData, Gravity,
     },
-    states::{loading::LoadingState, pause::PauseState, ExtendedStateEvent, PingEvent},
+    states::{
+        loading::LoadingState, pause::PauseState, win::WinState, ExtendedStateEvent, PingEvent,
+    },
     WorldDef,
 };
 use amethyst::{
@@ -43,6 +45,8 @@ const PING_PLAYER_SCALE: f32 = 5.0;
 const CHARA_WIDTH: f32 = 0.3;
 const CHARA_HEIGHT: f32 = 0.7;
 
+const WIN_SCORE: u32 = 5;
+
 #[derive(Default)]
 pub struct PingState<'a, 'b> {
     player_initmotion_timer: Option<f32>,
@@ -59,6 +63,8 @@ pub struct PingState<'a, 'b> {
     ui_root: Option<Entity>,
     score_ui: Option<Entity>,
     past_ui: Option<Entity>,
+    win_ui_root: Option<Entity>,
+    win_ui: Option<Entity>,
 }
 
 impl<'a, 'b, 'c, 'd> State<GameData<'c, 'd>, ExtendedStateEvent> for PingState<'a, 'b> {
@@ -116,6 +122,10 @@ impl<'a, 'b, 'c, 'd> State<GameData<'c, 'd>, ExtendedStateEvent> for PingState<'
             self.ui_root = Some(world.exec(|mut creator: UiCreator<'_>| {
                 creator.create("ui/score.ron", self.progress_counter.as_mut().unwrap())
             }));
+            self.win_ui_root = Some(world.exec(|mut creator: UiCreator<'_>| {
+                creator.create("ui/win.ron", self.progress_counter.as_mut().unwrap())
+            }));
+            dbg!(self.win_ui_root);
         }
     }
 
@@ -158,7 +168,7 @@ impl<'a, 'b, 'c, 'd> State<GameData<'c, 'd>, ExtendedStateEvent> for PingState<'
         &mut self,
         mut data: StateData<'_, GameData<'_, '_>>,
     ) -> Trans<GameData<'c, 'd>, ExtendedStateEvent> {
-        let world = &mut data.world;
+        let mut world = &mut data.world;
         // It is absolutely necessary
         data.data.update(world);
 
@@ -186,11 +196,17 @@ impl<'a, 'b, 'c, 'd> State<GameData<'c, 'd>, ExtendedStateEvent> for PingState<'
                 self.past_ui = finder.find("past_frame");
             })
         }
-
-        let mut ui_text = world.write_storage::<UiText>();
-        if let Some(score) = self.score_ui.and_then(|entity| ui_text.get_mut(entity)) {
-            score.text = format!("{}     {}", self.score[0], self.score[1]);
+        if self.win_ui.is_none() {
+            world.exec(|finder: UiFinder<'_>| {
+                self.win_ui = finder.find("win");
+            })
         }
+
+        world.exec(|mut ui_text: WriteStorage<UiText>| {
+            if let Some(score) = self.score_ui.and_then(|entity| ui_text.get_mut(entity)) {
+                score.text = format!("{}     {}", self.score[0], self.score[1]);
+            }
+        });
 
         if self.is_pressed {
             self.count_after_pressed += 1;
@@ -199,6 +215,31 @@ impl<'a, 'b, 'c, 'd> State<GameData<'c, 'd>, ExtendedStateEvent> for PingState<'
                 // TODO Switch後の演出実装
                 return Trans::Switch(Box::new(PingState::new_from(&self))); // NOTE cloneの代用．self.cloneではコンパイルが通らない．要調査．
             }
+        }
+
+        if self.score[0] >= WIN_SCORE || self.score[1] >= WIN_SCORE {
+            world.exec(
+                |(entitys, mut hiddens, exclamationmarks, mut ui_text): (
+                    Entities,
+                    WriteStorage<Hidden>,
+                    ReadStorage<Exclamationmark>,
+                    WriteStorage<UiText>,
+                )| {
+                    if let Some(win) = self.win_ui.and_then(|entity| ui_text.get_mut(entity)) {
+                        if self.score[0] > self.score[1] {
+                            win.text = format!("Player1 WIN");
+                        } else {
+                            win.text = format!("Player2 WIN");
+                        }
+                    }
+                    for (entity, exclamationmark) in (&entitys, &exclamationmarks).join() {
+                        hiddens
+                            .insert(entity, Hidden::default())
+                            .expect("Failed to insert hiddens");
+                    }
+                },
+            );
+            return Trans::Push(Box::new(WinState::new(self.win_ui_root.unwrap().clone())));
         }
 
         Trans::None
@@ -258,7 +299,8 @@ impl<'a, 'b, 'c, 'd> State<GameData<'c, 'd>, ExtendedStateEvent> for PingState<'
                 }
                 | InputEvent::ButtonPressed(Button::Key(VirtualKeyCode::Escape)) => {
                     log::debug!("push pause");
-                    Trans::Push(Box::new(PauseState))
+                    Trans::Push(Box::new(WinState::default()))
+                    // Trans::Push(Box::new(PauseState::default()))
                 }
                 _ => Trans::None,
             },
@@ -339,6 +381,7 @@ impl<'a, 'b> PingState<'a, 'b> {
             score_ui: s.score_ui.clone(),
             past_ui: s.past_ui.clone(),
             is_game_end: s.is_game_end.clone(),
+            win_ui_root: s.win_ui_root.clone(),
             ..Default::default()
         }
     }

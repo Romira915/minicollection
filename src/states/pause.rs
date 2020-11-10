@@ -1,11 +1,12 @@
 use crate::{
     components::player::{PingPlayer, PlayerState},
-    states::ExtendedStateEvent,
+    states::{title::TitleState, ExtendedStateEvent},
 };
 use amethyst::{
     animation::{self, AnimationControlSet, AnimationSet},
     assets::{AssetStorage, Handle, Loader},
     core::{math::*, transform::Transform},
+    ecs::Entity,
     ecs::{Entities, Join, ReadStorage, WriteStorage},
     input::{
         self, is_close_requested, Button, ControllerButton, InputEvent, InputHandler,
@@ -13,10 +14,19 @@ use amethyst::{
     },
     prelude::*,
     renderer::{Camera, ImageFormat, SpriteRender, SpriteSheet, SpriteSheetFormat, Texture},
+    ui::UiCreator,
+    ui::UiEvent,
+    ui::UiEventType,
+    ui::UiFinder,
     window::ScreenDimensions,
 };
 
-pub struct PauseState;
+#[derive(Default)]
+pub struct PauseState {
+    ui_root: Option<Entity>,
+    button_play: Option<Entity>,
+    button_title: Option<Entity>,
+}
 
 impl<'a, 'b> State<GameData<'a, 'b>, ExtendedStateEvent> for PauseState {
     fn on_start(&mut self, data: StateData<'_, GameData<'_, '_>>) {
@@ -24,13 +34,29 @@ impl<'a, 'b> State<GameData<'a, 'b>, ExtendedStateEvent> for PauseState {
         log::info!("pause");
 
         player_animation_control(world, "pause");
+
+        self.ui_root =
+            Some(world.exec(|mut creator: UiCreator<'_>| creator.create("ui/pause.ron", ())));
     }
 
     fn update(
         &mut self,
         data: StateData<'_, GameData<'_, '_>>,
     ) -> Trans<GameData<'a, 'b>, ExtendedStateEvent> {
-        data.data.update(data.world);
+        let mut world = data.world;
+        data.data.update(world);
+
+        if self.button_play.is_none() {
+            world.exec(|finder: UiFinder<'_>| {
+                self.button_play = finder.find("play");
+            });
+        }
+        if self.button_title.is_none() {
+            world.exec(|finder: UiFinder<'_>| {
+                self.button_title = finder.find("title");
+            })
+        }
+
         Trans::None
     }
 
@@ -51,12 +77,32 @@ impl<'a, 'b> State<GameData<'a, 'b>, ExtendedStateEvent> for PauseState {
                 }
                 _ => Trans::None,
             },
+            ExtendedStateEvent::Ui(UiEvent {
+                event_type: UiEventType::Click,
+                target,
+            }) => {
+                if Some(target) == self.button_play {
+                    Trans::Pop
+                } else if Some(target) == self.button_title {
+                    Trans::Replace(Box::new(TitleState::default()))
+                } else {
+                    Trans::None
+                }
+            }
             _ => Trans::None,
         }
     }
 
     fn on_stop(&mut self, data: StateData<'_, GameData<'_, '_>>) {
         let world = data.world;
+
+        if let Some(entity) = self.ui_root {
+            world
+                .delete_entity(entity)
+                .expect("Failed to remove pause ui_root");
+        }
+        self.button_play = None;
+        self.button_title = None;
 
         player_animation_control(world, "start");
     }

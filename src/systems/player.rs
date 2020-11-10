@@ -68,16 +68,16 @@ impl<'s> System<'s> for PlayerSystem {
             //     generaldata.velocity.y * time.delta_seconds(),
             //     0.0,
             // );
-            transform.prepend_translation_x(generaldata.velocity.x * time.delta_seconds());
+            // transform.prepend_translation_x(generaldata.velocity.x * time.delta_seconds());
             transform.prepend_translation_y(generaldata.velocity.y * time.delta_seconds());
 
-            if generaldata.velocity.x * -transform.scale().x < 0.0 {
-                transform.scale_mut().x *= -1.0;
-            }
+            // if generaldata.velocity.x * -transform.scale().x < 0.0 {
+            //     transform.scale_mut().x *= -1.0;
+            // }
             
             // Animation transition with priority
             if generaldata.velocity.x != 0.0 {
-                p_player.push_state(PlayerState::Run);
+                // p_player.push_state(PlayerState::Run);
                 // log::info!("player push Run");
             } else if p_player.is_on_stage {
                 p_player.push_state(PlayerState::BattleMode);

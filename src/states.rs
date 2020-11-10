@@ -2,6 +2,7 @@ pub mod loading;
 pub mod pause;
 pub mod ping;
 pub mod title;
+pub mod win;
 
 use amethyst::{
     assets::{AssetStorage, Handle, Loader, ProgressCounter},

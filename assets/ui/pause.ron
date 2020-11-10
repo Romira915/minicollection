@@ -1,0 +1,53 @@
+#![enable(implicit_some)]
+Container(
+    transform: (
+        id: "pause_root",
+        anchor: Middle,
+        stretch: XY( x_margin: 0., y_margin: 0., keep_aspect_ratio: false),
+        width: 20.,
+        height: 20.,
+    ),
+    background: SolidColor(0.0, 0.0, 0.0, 0.0),
+    children: [
+        Button(
+            transform: (
+                id: "play",
+                y: 80.0,
+                width: 750.,
+                height: 145.,
+                anchor: Middle,
+                mouse_reactive: true,
+                selectable: 0
+            ),
+            button: (
+                text: "PLAY",
+                font_size: 80.,
+                font: File("font/rounded-mplus-1p-bold.ttf", ("TTF", ())),
+                normal_text_color: (1.0, 1.0, 1.0, 1.0),
+                normal_image: SolidColor(0., 0., 0., 1.),
+                hover_image: SolidColor(0.1, 0.1, 0.1, 1.),
+                press_image: SolidColor(0.15, 0.15, 0.15, 1.),
+            )
+        ),
+        Button(
+            transform: (
+                id: "title",
+                y: -80.0,
+                width: 750.,
+                height: 145.,
+                anchor: Middle,
+                mouse_reactive: true,
+                selectable: 1
+            ),
+            button: (
+                text: "TITLE",
+                font_size: 80.,
+                font: File("font/rounded-mplus-1p-bold.ttf", ("TTF", ())),
+                normal_text_color: (1.0, 1.0, 1.0, 1.0),
+                normal_image: SolidColor(0., 0., 0., 1.),
+                hover_image: SolidColor(0.1, 0.1, 0.1, 1.),
+                press_image: SolidColor(0.15, 0.15, 0.15, 1.),
+            )
+        )
+    ],
+)
