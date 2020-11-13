@@ -142,8 +142,14 @@ impl<'s> System<'s> for ExclamationmarkSystem {
 
 impl Default for ExclamationmarkSystem {
     fn default() -> Self {
+        use rand::rngs::ThreadRng;
+        use rand_distr::{Distribution, Float, Normal, StandardNormal};
+        let mut rng = rand::thread_rng();
+        let gaussian = Normal::new(5.0, 3.0).unwrap();
+        let spanw_frame = crate::FRAME_RATE as f64 * gaussian.sample(&mut rng);
+
         Self {
-            spanw_frame: crate::FRAME_RATE * 5,
+            spanw_frame: spanw_frame as usize,
             count_frame: Default::default(),
             past_frame: Default::default(),
             pressed: false,

@@ -65,6 +65,7 @@ pub struct PingState<'a, 'b> {
     past_ui: Option<Entity>,
     win_ui_root: Option<Entity>,
     win_ui: Option<Entity>,
+    sky_num: usize,
 }
 
 impl<'a, 'b, 'c, 'd> State<GameData<'c, 'd>, ExtendedStateEvent> for PingState<'a, 'b> {
@@ -125,8 +126,9 @@ impl<'a, 'b, 'c, 'd> State<GameData<'c, 'd>, ExtendedStateEvent> for PingState<'
             self.win_ui_root = Some(world.exec(|mut creator: UiCreator<'_>| {
                 creator.create("ui/win.ron", self.progress_counter.as_mut().unwrap())
             }));
-            dbg!(self.win_ui_root);
         }
+
+        self.remove_hidden_onSky(world);
     }
 
     fn on_stop(&mut self, data: StateData<'_, GameData<'_, '_>>) {
@@ -382,6 +384,7 @@ impl<'a, 'b> PingState<'a, 'b> {
             past_ui: s.past_ui.clone(),
             is_game_end: s.is_game_end.clone(),
             win_ui_root: s.win_ui_root.clone(),
+            sky_num: (s.sky_num + 1) % 3,
             ..Default::default()
         }
     }
@@ -491,93 +494,97 @@ impl<'a, 'b> PingState<'a, 'b> {
     }
     fn init_backgrounds(&mut self, world: &mut World) {
         let image_paths = [
-            ("day-beach-sky", "day-backgrounds"),
-            ("sunset-beach-sky", "sunset-backgrounds"),
-            ("night-beach-sky", "night-backgrounds"),
+            ("day-beach-sky", "day-backgrounds", SkyTime::Day),
+            ("sunset-beach-sky", "sunset-backgrounds", SkyTime::Sunset),
+            ("night-beach-sky", "night-backgrounds", SkyTime::Night),
         ];
 
-        for (sky, background) in image_paths.iter() {}
-
-        use amethyst::renderer::sprite::{
-            SpriteList,
-            Sprites::{self, *},
-        };
-        use std::{fs::File, io::Read};
-        let (screen_width, screen_height) = super::get_screensize(world);
-        //background setting
-        let mut transform = Transform::default();
-        transform.set_translation_xyz(screen_width * 0.5, screen_height * 0.5, -1.0);
-        // transform.set_translation_xyz(screen_width * 0.0, screen_height * 0.0, -1.0);
-        transform.set_scale(Vector3::new(
-            screen_width / 1920.0,
-            screen_height / 1080.0,
-            1.0,
-        ));
-        let sprite_render = SpriteRender {
-            sprite_sheet: super::load_sprite_sheet(
+        for (sky, backgrounds_path, skytime) in image_paths.iter() {
+            use amethyst::renderer::sprite::{
+                SpriteList,
+                Sprites::{self, *},
+            };
+            use std::{fs::File, io::Read};
+            let (screen_width, screen_height) = super::get_screensize(world);
+            //background setting
+            let mut transform = Transform::default();
+            transform.set_translation_xyz(screen_width * 0.5, screen_height * 0.5, -1.0);
+            // transform.set_translation_xyz(screen_width * 0.0, screen_height * 0.0, -1.0);
+            transform.set_scale(Vector3::new(
+                screen_width / 1920.0,
+                screen_height / 1080.0,
+                1.0,
+            ));
+            let sprite_render = SpriteRender {
+                sprite_sheet: super::load_sprite_sheet(
+                    world,
+                    &format!("backgrounds/{}", sky),
+                    self.progress_counter.as_mut().unwrap(),
+                ),
+                sprite_number: 0,
+            };
+            // cloud setting
+            let backgrounds_path = &(String::from("backgrounds/") + *backgrounds_path);
+            let mut cloud_transform = Transform::default();
+            let cloud_scale = 0.3;
+            cloud_transform.set_scale(Vector3::new(
+                screen_width / 1920.0 * cloud_scale,
+                screen_width / 1080.0 * cloud_scale,
+                1.0,
+            ));
+            let mut cloud2_transform = cloud_transform.clone();
+            cloud_transform.set_translation_xyz(screen_width * 0.233, screen_height * 0.9, -0.9);
+            cloud2_transform.set_translation_xyz(screen_width * 0.788, screen_height * 0.75, -0.9);
+            let backgrounds_sprite_sheet = super::load_sprite_sheet(
                 world,
-                "backgrounds/day-beach-sky",
+                backgrounds_path,
                 self.progress_counter.as_mut().unwrap(),
-            ),
-            sprite_number: 0,
-        };
-        // cloud setting
-        let backgrounds_path = "backgrounds/day-backgrounds";
-        let mut cloud_transform = Transform::default();
-        let cloud_scale = 0.3;
-        cloud_transform.set_scale(Vector3::new(
-            screen_width / 1920.0 * cloud_scale,
-            screen_width / 1080.0 * cloud_scale,
-            1.0,
-        ));
-        let mut cloud2_transform = cloud_transform.clone();
-        cloud_transform.set_translation_xyz(screen_width * 0.233, screen_height * 0.9, -0.9);
-        cloud2_transform.set_translation_xyz(screen_width * 0.788, screen_height * 0.75, -0.9);
-        let backgrounds_sprite_sheet = super::load_sprite_sheet(
-            world,
-            backgrounds_path,
-            self.progress_counter.as_mut().unwrap(),
-        );
-        let cloud_sprite_render = SpriteRender {
-            sprite_sheet: backgrounds_sprite_sheet.clone(),
-            sprite_number: 0,
-        };
-        let cloud2_sprite_render = SpriteRender {
-            sprite_sheet: backgrounds_sprite_sheet,
-            sprite_number: 1,
-        };
-        let (cloud, cloud2) = {
-            let size = super::get_sprite_size(backgrounds_path, 0).unwrap();
-            let size2 = super::get_sprite_size(backgrounds_path, 1).unwrap();
-            (
-                Cloud::new(size.mul(cloud_scale)),
-                Cloud::new(size2.mul(cloud_scale)),
-            )
-        };
-        self.entities.push(
-            world
-                .create_entity()
-                .with(Background::default())
-                .with(transform)
-                .with(sprite_render)
-                .build(),
-        );
-        self.entities.push(
-            world
-                .create_entity()
-                .with(cloud)
-                .with(cloud_transform)
-                .with(cloud_sprite_render)
-                .build(),
-        );
-        self.entities.push(
-            world
-                .create_entity()
-                .with(cloud2)
-                .with(cloud2_transform)
-                .with(cloud2_sprite_render)
-                .build(),
-        );
+            );
+            let cloud_sprite_render = SpriteRender {
+                sprite_sheet: backgrounds_sprite_sheet.clone(),
+                sprite_number: 0,
+            };
+            let cloud2_sprite_render = SpriteRender {
+                sprite_sheet: backgrounds_sprite_sheet,
+                sprite_number: 1,
+            };
+            let (cloud, cloud2) = {
+                let size = super::get_sprite_size(backgrounds_path, 0).unwrap();
+                let size2 = super::get_sprite_size(backgrounds_path, 1).unwrap();
+                (
+                    Cloud::new(size.mul(cloud_scale), *skytime),
+                    Cloud::new(size2.mul(cloud_scale), *skytime),
+                )
+            };
+            self.entities.push(
+                world
+                    .create_entity()
+                    .with(Background::new(*skytime))
+                    .with(transform)
+                    .with(sprite_render)
+                    .with(Hidden)
+                    .build(),
+            );
+            self.entities.push(
+                world
+                    .create_entity()
+                    .with(cloud)
+                    .with(cloud_transform)
+                    .with(cloud_sprite_render)
+                    .with(Hidden)
+                    .build(),
+            );
+            self.entities.push(
+                world
+                    .create_entity()
+                    .with(cloud2)
+                    .with(cloud2_transform)
+                    .with(cloud2_sprite_render)
+                    .with(Hidden)
+                    .build(),
+            );
+
+        }
     }
     fn init_stage(&mut self, world: &mut World) {
         let (screen_width, screen_height) = super::get_screensize(world);
@@ -621,6 +628,41 @@ impl<'a, 'b> PingState<'a, 'b> {
                 );
             }
         }
+    }
+
+    fn remove_hidden_onSky(&mut self, world: &mut World) {
+        world.exec(
+            |(mut hiddens, entites, backgrounds, clouds): (
+                WriteStorage<Hidden>,
+                Entities,
+                ReadStorage<Background>,
+                ReadStorage<Cloud>,
+            )| {
+                let sky = [SkyTime::Day, SkyTime::Sunset, SkyTime::Night];
+                for (entity, background) in (&entites, &backgrounds).join() {
+                    if background.skytime == sky[self.sky_num] {
+                        if let Some(_) = hiddens.get(entity) {
+                            hiddens.remove(entity).unwrap();
+                        }
+                    } else {
+                        if let None = hiddens.get(entity) {
+                            hiddens.insert(entity, Hidden).unwrap();
+                        }
+                    }
+                }
+                for (entity, cloud) in (&entites, &clouds).join() {
+                    if cloud.skytime == sky[self.sky_num] {
+                        if let Some(_) = hiddens.get(entity) {
+                            hiddens.remove(entity).unwrap();
+                        }
+                    } else {
+                        if let None = hiddens.get(entity) {
+                            hiddens.insert(entity, Hidden).unwrap();
+                        }
+                    }
+                }
+            },
+        )
     }
 }
 

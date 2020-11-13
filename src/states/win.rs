@@ -23,6 +23,7 @@ use amethyst::{
 };
 
 const HIDE_REMOVE_LIMIT: f32 = 3f32;
+const GO_TO_TITLE_LIMIT: f32 = HIDE_REMOVE_LIMIT + 5f32;
 
 #[derive(Default)]
 pub struct WinState {
@@ -30,6 +31,7 @@ pub struct WinState {
     label_win: Option<Entity>,
     hide_remove_count: f32,
     is_hide_remove: bool,
+    go_to_title_count: f32,
 }
 
 impl<'a, 'b> State<GameData<'a, 'b>, ExtendedStateEvent> for WinState {
@@ -44,13 +46,11 @@ impl<'a, 'b> State<GameData<'a, 'b>, ExtendedStateEvent> for WinState {
         let mut world = data.world;
         data.data.update(world);
 
+        let delta_time = world.exec(|time: Read<Time>| time.delta_seconds());
+
         if self.label_win.is_none() {
             self.label_win = world.exec(|finder: UiFinder<'_>| finder.find("win"));
         }
-
-        world.exec(|time: Read<Time>| {
-            self.hide_remove_count += time.delta_seconds();
-        });
 
         if self.hide_remove_count > HIDE_REMOVE_LIMIT && !self.is_hide_remove {
             if let Some(entity) = self.label_win {
@@ -61,6 +61,14 @@ impl<'a, 'b> State<GameData<'a, 'b>, ExtendedStateEvent> for WinState {
                 });
                 self.is_hide_remove = true;
             }
+        } else {
+            self.hide_remove_count += delta_time;
+        }
+
+        if self.go_to_title_count > GO_TO_TITLE_LIMIT {
+            return Trans::Replace(Box::new(TitleState::default()));
+        } else {
+            self.go_to_title_count += delta_time;
         }
 
         Trans::None
