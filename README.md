@@ -1,4 +1,4 @@
-# mini_collection
+# minicollection
 
 ## How to run
 
