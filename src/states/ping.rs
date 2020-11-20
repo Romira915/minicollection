@@ -241,6 +241,7 @@ impl<'a, 'b, 'c, 'd> State<GameData<'c, 'd>, ExtendedStateEvent> for PingState<'
                     }
                 },
             );
+            self.is_game_end = true;
             return Trans::Push(Box::new(WinState::new(self.win_ui_root.unwrap().clone())));
         }
 
@@ -583,7 +584,6 @@ impl<'a, 'b> PingState<'a, 'b> {
                     .with(Hidden)
                     .build(),
             );
-
         }
     }
     fn init_stage(&mut self, world: &mut World) {
